@@ -1,0 +1,160 @@
+---
+title: "Domain Forwarding Best Practices for Cold Email – Why, When & How to Use It in Icemail"
+description: "Learn when to use domain forwarding, when to avoid it, how it protects your main domain reputation, and how to set it up step-by-step in Icemail."
+gleap_id: "6a2faef3701a7c82e13e4d0a"
+gleap_collection: "6849b63fe92e06806c87c22a"
+gleap_collection_slug: "domain-management"
+isDraft: false
+content_hash: "c20e6e3c"
+---
+
+Redirecting cold email domains to your main website is one of the smartest—and most overlooked—steps in cold email infrastructure. This guide covers everything you need to know about domain forwarding: when to use it, when to avoid it, how to set it up in Icemail, common mistakes, and answers to the most frequently asked questions.
+
+---
+
+### What Is Domain Forwarding?
+
+**Domain forwarding** (also called URL forwarding or domain redirect) automatically sends anyone who visits one domain directly to another. For example, if a prospect types `yourcampaign.io` into their browser, they are instantly redirected to `yourcompany.com`.
+
+In the context of cold email infrastructure, domain forwarding is used so that the secondary "sending domains" you buy for cold outreach don't look like dead ends to prospects or spam filters.
+
+---
+
+### Why Domain Forwarding Matters for Cold Email
+
+When you send cold emails, best practice is to **never send from your primary domain** (e.g., `yourcompany.com`). Instead, you buy secondary domains (e.g., `yourcompany-hq.com`, `getourproduct.io`) and send from those. This protects your primary domain's reputation.
+
+But here's the problem: if a prospect receives an email from `yourcompany-hq.com` and tries to visit that website, they see a blank page or an error. That looks suspicious—both to the human and to spam filters that crawl links.
+
+**Domain forwarding solves this by redirecting secondary domains to your real website.** Your prospect lands on your main site, and your secondary domain looks legitimate.
+
+---
+
+### When TO Use Domain Forwarding
+
+Use domain forwarding in the following situations:
+
+- **You own secondary/alias sending domains** — Any domain you purchased specifically for cold outreach (not your main brand domain) should forward to your main website.
+- **You want to protect your primary domain's reputation** — By sending from secondaries that look real, you avoid risking the deliverability of your primary domain.
+- **You're running multi-domain outreach campaigns** — When you have 5, 10, or 20+ sending domains, forwarding all of them to your main site keeps your brand consistent.
+- **Your prospects may Google your sending domain** — If anyone checks whether your domain is real, they should land on your website.
+- **You're setting up brand-new domains** — New domains should have domain forwarding enabled before you start warming them up.
+
+---
+
+### When NOT to Use Domain Forwarding
+
+There are specific scenarios where domain forwarding should **not** be used:
+
+- **Do not forward the domain you are actively sending cold emails from** — Forwarding your sending domain to another domain can create DNS and email delivery conflicts. The forwarding and the email records must coexist correctly; misconfiguration can break your SPF/DKIM alignment.
+- **Do not forward your primary brand domain** — Your `yourcompany.com` should remain your main website. Do not forward it anywhere.
+- **Do not use domain forwarding as a replacement for proper DNS setup** — You still need SPF, DKIM, and DMARC records on every sending domain. Forwarding is for web traffic only; it does not affect email routing.
+- **Do not forward to a domain that itself has deliverability issues** — If your main domain has been blacklisted or has poor reputation, forwarding to it won't help and may raise more flags.
+
+---
+
+### How Domain Forwarding Protects Your Main Domain's Reputation
+
+Your primary domain (`yourcompany.com`) likely has years of good sending history, positive engagement signals, and trusted relationships. Sending cold outreach from it puts all of that at risk.
+
+By building a secondary domain infrastructure:
+
+1. **Cold outreach reputation stays isolated** — Any spam complaints, bounces, or blocklist hits on your secondary domains do not affect your primary domain.
+2. **Secondary domains look real thanks to forwarding** — Spam filters check whether a sending domain resolves to a real website. A domain that forwards to a legitimate company site passes these checks.
+3. **Your primary domain keeps its Google/Microsoft trust scores** — Gmail and Outlook maintain sender reputation scores per domain. Keeping cold email on secondaries protects your primary score.
+4. **If a secondary domain gets flagged, you retire it** — You can simply stop sending from a burned domain and replace it with a fresh one, with zero impact on your main brand.
+
+---
+
+### How to Set Up Domain Forwarding in Icemail – Step by Step
+
+#### **Step 1: Go to the Domains Dashboard**
+
+Log in to your **Icemail** account and click on **"Domains"** in the left-hand navigation menu.
+
+#### **Step 2: Select the Domain to Forward**
+
+Find the secondary sending domain you want to redirect (e.g., `yourcompany-hq.com`). Click on it to open the domain detail panel.
+
+#### **Step 3: Open Domain Settings**
+
+Click **"See More"** to expand the domain sidebar. Then navigate to the **"Domain Settings"** tab.
+
+#### **Step 4: Enter Your Target (Main) Domain**
+
+In the **Domain Forwarding** section, enter the full URL of your main website (e.g., `https://yourcompany.com`).
+
+> _Important: Always include the full protocol (`https://`). Do not enter just `yourcompany.com` without the protocol prefix._
+
+#### **Step 5: Save Your Settings**
+
+Click **"Save."** Domain forwarding is now active for that domain.
+
+All web traffic to your secondary domain will immediately redirect to your main website. No DNS propagation delay is required—the change takes effect almost instantly.
+
+#### **Step 6: Repeat for All Secondary Sending Domains**
+
+Repeat Steps 2–5 for every secondary domain in your Icemail account. Every sending domain should forward to your main website.
+
+---
+
+### Common Mistakes to Avoid
+
+- **Forgetting to set up forwarding on new domains** — When you add new sending domains to Icemail, make sure to configure forwarding before you start sending campaigns. Build it into your domain setup checklist.
+- **Forwarding to a URL that returns a 404 or error** — Test every forwarding destination by visiting the secondary domain in a browser. If the redirect is broken, fix it immediately.
+- **Using HTTP instead of HTTPS** — Always forward to your HTTPS URL. Forwarding to `http://` is a minor trust signal issue; modern browsers flag non-HTTPS sites.
+- **Thinking forwarding replaces email authentication** — Domain forwarding is for web traffic only. You still need SPF, DKIM, and DMARC records on every sending domain to ensure email deliverability. Do not skip DNS authentication setup.
+- **Forwarding your primary domain to a secondary** — The direction must always be secondary → primary. Never forward your main domain away from your main website.
+- **Setting up forwarding on a domain you no longer use** — If you retire a sending domain, it doesn't hurt to leave forwarding active, but keep your Icemail domain list clean and organized.
+
+---
+
+### Frequently Asked Questions
+
+**Does domain forwarding affect my email deliverability?**
+
+Domain forwarding affects web traffic only—it does not route or change email. Your SPF, DKIM, and DMARC records handle email authentication independently. However, having a domain that resolves to a real website (via forwarding) is a positive signal for spam filters that check domain legitimacy.
+
+**How long does it take for domain forwarding to activate?**
+
+In Icemail, domain forwarding takes effect almost immediately after saving. No DNS changes are required on your end—Icemail handles the redirect at the infrastructure level.
+
+**Should I forward all my sending domains?**
+
+Yes. Every secondary domain you use for cold outreach should forward to your main website. This applies whether the domain is actively sending, warming up, or parked.
+
+**Can I forward to a specific page instead of my homepage?**
+
+Yes. Instead of `https://yourcompany.com`, you can enter `https://yourcompany.com/about` or any other specific page URL as the forwarding destination.
+
+**Do I need to set up forwarding for Google Workspace and Microsoft 365 domains separately?**
+
+No. Domain forwarding in Icemail applies to the domain itself, regardless of which mailbox type (Google, Microsoft, SMTP, or Azure) is set up on it. You configure it once per domain.
+
+**What happens to email if I set up domain forwarding?**
+
+Nothing. Domain forwarding in Icemail only handles HTTP/web traffic. Your email DNS records (MX, SPF, DKIM, DMARC) are completely unaffected.
+
+**My secondary domain has no website—does that hurt deliverability?**
+
+Without forwarding, a secondary domain with no website looks like a dead domain, which can be a negative signal for spam filters. Setting up forwarding to your main website makes the domain look active and legitimate, which is better for deliverability.
+
+---
+
+### Related Articles
+
+- [How to Set Up Domain Forwarding in Icemail](#)
+- [Understanding Domain Forwarding, DMARC, Forwarding Email, and Catch-All Email](#)
+- [How to Set Up DMARC Email in Icemail](#)
+- [Setting Up Email Forwarding for Google & Microsoft Workspaces](#)
+- [How to Set Up Catch-All Email in Icemail](#)
+
+---
+
+### Need Help?
+
+Have questions about domain forwarding or your cold email infrastructure setup? Our team is here to help.
+
+Email us anytime at [**team@icemail.ai**](mailto:team@icemail.ai)
+
+---
