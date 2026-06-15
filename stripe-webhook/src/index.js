@@ -2,15 +2,6 @@ import Stripe from "stripe";
 
 export default {
   async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-
-    // Temporary diagnostic endpoint — remove after debugging.
-    // GET /debug       → tests OAuth token refresh + Gmail profile (no email sent)
-    // GET /debug?send=1 → also sends a test email to GMAIL_SENDER_ADDRESS
-    if (request.method === "GET" && url.pathname === "/debug") {
-      return debugCheck(env, url.searchParams.get("send") === "1");
-    }
-
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
     }
@@ -57,83 +48,6 @@ export default {
     });
   },
 };
-
-// Temporary diagnostic — reports which step of the Gmail path fails.
-// Returns no secrets, only status strings. Remove after debugging.
-async function debugCheck(env, doSend) {
-  const result = { steps: {}, config: {} };
-
-  // Non-secret config echo to verify the right values are wired up.
-  // Client IDs and sender address are not secrets; refresh token/secret
-  // are only reported as present/absent + length, never their values.
-  result.config.clientId = env.GMAIL_CLIENT_ID || "(missing)";
-  result.config.senderAddress = env.GMAIL_SENDER_ADDRESS || "(missing)";
-  result.config.clientSecretPresent = env.GMAIL_CLIENT_SECRET
-    ? `yes (len ${env.GMAIL_CLIENT_SECRET.length})`
-    : "no";
-  result.config.refreshTokenPresent = env.GMAIL_REFRESH_TOKEN
-    ? `yes (len ${env.GMAIL_REFRESH_TOKEN.length})`
-    : "no";
-  // One-way hash prefixes — safe to expose, lets us confirm a value
-  // actually changed between updates without revealing it.
-  result.config.clientSecretFingerprint = await fingerprint(
-    env.GMAIL_CLIENT_SECRET
-  );
-  result.config.refreshTokenFingerprint = await fingerprint(
-    env.GMAIL_REFRESH_TOKEN
-  );
-
-  let accessToken;
-  try {
-    accessToken = await getAccessToken(env);
-    result.steps.tokenRefresh = "ok";
-  } catch (err) {
-    result.steps.tokenRefresh = `FAILED: ${err.message}`;
-    return jsonResponse(result);
-  }
-
-  try {
-    const res = await fetch(
-      "https://gmail.googleapis.com/gmail/v1/users/me/profile",
-      { headers: { Authorization: `Bearer ${accessToken}` } }
-    );
-    const data = await res.json();
-    result.steps.profile = res.ok
-      ? `ok: authenticated as ${data.emailAddress}`
-      : `FAILED ${res.status}: ${JSON.stringify(data)}`;
-  } catch (err) {
-    result.steps.profile = `FAILED: ${err.message}`;
-  }
-
-  if (doSend) {
-    try {
-      await sendFounderEmail(env, env.GMAIL_SENDER_ADDRESS, "Debug Test");
-      result.steps.testSend = `ok: sent to ${env.GMAIL_SENDER_ADDRESS}`;
-    } catch (err) {
-      result.steps.testSend = `FAILED: ${err.message}`;
-    }
-  }
-
-  return jsonResponse(result);
-}
-
-async function fingerprint(value) {
-  if (!value) return "(missing)";
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    new TextEncoder().encode(value)
-  );
-  return [...new Uint8Array(digest)]
-    .slice(0, 6)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-function jsonResponse(obj) {
-  return new Response(JSON.stringify(obj, null, 2), {
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 async function getAccessToken(env) {
   const res = await fetch("https://oauth2.googleapis.com/token", {
