@@ -2,6 +2,15 @@ import Stripe from "stripe";
 
 export default {
   async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // Temporary diagnostic endpoint — remove after debugging.
+    // GET /debug       → tests OAuth token refresh + Gmail profile (no email sent)
+    // GET /debug?send=1 → also sends a test email to GMAIL_SENDER_ADDRESS
+    if (request.method === "GET" && url.pathname === "/debug") {
+      return debugCheck(env, url.searchParams.get("send") === "1");
+    }
+
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
     }
@@ -48,6 +57,51 @@ export default {
     });
   },
 };
+
+// Temporary diagnostic — reports which step of the Gmail path fails.
+// Returns no secrets, only status strings. Remove after debugging.
+async function debugCheck(env, doSend) {
+  const result = { steps: {} };
+
+  let accessToken;
+  try {
+    accessToken = await getAccessToken(env);
+    result.steps.tokenRefresh = "ok";
+  } catch (err) {
+    result.steps.tokenRefresh = `FAILED: ${err.message}`;
+    return jsonResponse(result);
+  }
+
+  try {
+    const res = await fetch(
+      "https://gmail.googleapis.com/gmail/v1/users/me/profile",
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    const data = await res.json();
+    result.steps.profile = res.ok
+      ? `ok: authenticated as ${data.emailAddress}`
+      : `FAILED ${res.status}: ${JSON.stringify(data)}`;
+  } catch (err) {
+    result.steps.profile = `FAILED: ${err.message}`;
+  }
+
+  if (doSend) {
+    try {
+      await sendFounderEmail(env, env.GMAIL_SENDER_ADDRESS, "Debug Test");
+      result.steps.testSend = `ok: sent to ${env.GMAIL_SENDER_ADDRESS}`;
+    } catch (err) {
+      result.steps.testSend = `FAILED: ${err.message}`;
+    }
+  }
+
+  return jsonResponse(result);
+}
+
+function jsonResponse(obj) {
+  return new Response(JSON.stringify(obj, null, 2), {
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
 async function getAccessToken(env) {
   const res = await fetch("https://oauth2.googleapis.com/token", {
