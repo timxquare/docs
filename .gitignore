@@ -3,7 +3,10 @@
 .env.local
 .env.*.local
 stripe-webhook/.env
+.dev.vars
+stripe-webhook/.dev.vars
 
-# Node
+# Node / Wrangler
 node_modules/
 npm-debug.log*
+.wrangler/
