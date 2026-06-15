@@ -1,0 +1,1251 @@
+[
+  {
+    "rank": 1,
+    "topic": "other",
+    "count": 1302,
+    "sample_titles": [
+      "Unable to select domains when assigning a mailbox",
+      "Unable to delete emails in iBox",
+      "Domains Settings Tab Not Visible",
+      "Unintelligible Ticket: No Clear Request",
+      "The gift"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2f3bb8d332100c8730e7b4",
+        "title": "",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey you can reachout to us at team@icemail.ai"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2e0c7d6f94321f5db4b6f3",
+        "title": "",
+        "status": "OPEN",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Jim,  You can add domains to icemail directly from cloudfare without changing NS, just go to domain section select connect domain via cloudfare api and add the domains.  This way all the DNS setup will be done on your cloudfare directly.  Note: The API will only permit Icemail to change the DNS for the domains added in the Icemail"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2eb52669cf4b508bdb55a2",
+        "title": "",
+        "status": "OPEN",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Muhammad, Let me check the status",
+          "There is some issue from our end and since its sunday so dev team is not available, please wait for few hour.  I will update you once the mailboxes are active",
+          "Sure",
+          "It will take few hours, tomo morning by 10AM IST   But can you tell me where do you want to export the mailboxes ? If possible you can export he 2 active ones now, rest we will export once they are active.",
+          "ok, you can select the active mailboxes by selecting them and adding reachinbox creds in the export section."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 2,
+    "topic": "general_support",
+    "count": 282,
+    "sample_titles": [
+      "Request for Live Agent Support",
+      "Urgent human agent connection needed",
+      "Request to connect to support agent",
+      "Request to Connect with Human Support",
+      "User requests support assistance"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2e7c4d197b56d1729ec007",
+        "title": "Urgent human agent connection needed",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, How can i help you?",
+          "Unfortunately, 2FA cannot be removed from the accounts. It is a required security measure that helps keep accounts secure and properly synced with our system. We understand it may add an extra step when managing client accounts, but at this time, email-and-password-only login is not supported.",
+          "I understand. If you're referring to the Icemail account login and not the mailbox 2FA, you can add your clients' email addresses to your workspace. This allows them to access the workspace directly using their own email accounts, without needing to share a single login.",
+          "You can add your clients as members of your workspace so they can access it using their own email accounts. To do this: Go to Settings \u2192 Workspace. Select your workspace. Click Add New Member. Choose the appropriate role for the user. Send the invitation. The user will receive an invite at their email address and can then access the workspace using their own account.",
+          "Yes, you can do that."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2dad9b65d22307eb6596ce",
+        "title": "Request to connect to support agent",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Taylor,  How can i help you today?",
+          "Let me check once",
+          "For the following domain - getbidviz.com  you will need to clear existing google workspace.  Follow the steps to clear the workspace  1. Go to official google workspace link -  https://toolbox.googleapps.com/apps/recovery/domain_in_use 2. Enter domain and fill the form and in step 3 you will get a txt record which you will have to enter in your domain registrar. Also you will need to change the NS back to default so that google can verify domain ownership.  3. Once TXt is added you will receive official request email on your mail-id.  4. Google takes 12-24 hrs to verify the ownership, once done click on the link shared in your email to finally generate request to free the domain.  5. Once the request is generated you will receive another email of confirmation, again it usually takes 12 hrs for google to free the domain.  6. Once domain is freed you can reconnect your domain back to icemail.",
+          "I am checking the other issue, give me some time",
+          "I have re-triggered mailbox assignment for the failed mailboxes.  It will be active in some time."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2c6576f69045c4880d67ea",
+        "title": "User requests support assistance",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Kipper, All mailboxes have been deactivated, and we've initiated the mailbox deletion process."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 3,
+    "topic": "billing_payment",
+    "count": 146,
+    "sample_titles": [
+      "Need direct payment link for domain and mailbox purchase",
+      "Action Required: Google Mailbox Renewal Pending",
+      "Refund request for unexpected subscription charge",
+      "Unwanted Charges After Disabling Auto Top-Up",
+      "Quote Request for Renewing All Mailboxes"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2e684fcab3d5ba752159c3",
+        "title": "Need direct payment link for domain and mailbox purchase",
+        "status": "OPEN",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Gurtene, The standard way to handle purchases is through the wallet in our portal. However, as discussed earlier, we can provide a direct payment link in your case. I've forwarded this to our billing team, and they'll help arrange the payment link for you. Thank you for your patience while we get this processed.",
+          "Can you share the domains you want to purchase as well so we can generate the payment link accordingly?",
+          "Yes we can connect them to reachinbox as well.",
+          "I've forwarded this to our billing team. Once the payment link is ready, I'll send it to you here right away.",
+          "Yes, you can do that."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "69fc10d91822fa18ecc38b68",
+        "title": "Action Required: Google Mailbox Renewal Pending",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hi aegenticx, Your 10 Google mailboxes are currently deactivated on the UI due to pending renewal, but we\u2019ve temporarily held the permanent deletion on the backend. Your wallet is currently $40 short for renewal. Please add the required balance by the end of today and let us know once done so we can activate the mailboxes for you. If you\u2019d prefer to delete these mailboxes instead, please let us know accordingly. Best, Team Icemail",
+          "Hey Aegenticx, Out of the 70 mailboxes in your workspace, please let us know the domains you want to cancel from the IDCREX domain. For the remaining 65 mailboxes, since they have already been permanently deleted, Google applies a $4 reactivation charge per mailbox to restore them. Please note this will also continue as a recurring mailbox charge moving forward. Total reactivation cost for 65 mailboxes: $260 Please add the amount to your wallet and let us know once done so we can proceed with the reactivation.",
+          "Usually, we do not recommend reactivating the mailboxes at this pricing. If there are any ongoing campaigns associated with these mailboxes, you can still proceed with the reactivation. Otherwise, we would recommend creating fresh new mailboxes on the same domains instead, as that would be a more cost-effective option moving forward.",
+          "Let us know how you would like us to proceed. If you would prefer creating fresh new mailboxes, we will need to request deletion of the previous workspace first, and that process usually takes around 24 hours to complete.",
+          "Yes, if we create fresh new mailboxes on the same domains, they will need to go through the warm-up process again for around 2 weeks before being fully ready for sending at scale."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a280ab1d88c1edb36c94f69",
+        "title": "Unwanted Charges After Disabling Auto Top-Up",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Kyle, let me check this.",
+          "I understand your frustration, and I'm sorry for the confusion. I checked your mailbox settings, and the Mailbox Renewal Preference is currently set to Auto-Renew. When this setting is enabled, mailboxes are automatically renewed when they reach their renewal date, which is why the charges were applied.",
+          "Screenshot for reference.",
+          "I've disabled it now. The mailboxes will not autorenew.",
+          "I've now disabled the Auto-Renew setting on your account to prevent any future automatic renewals."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 4,
+    "topic": "mailbox_export",
+    "count": 120,
+    "sample_titles": [
+      "CSV Export Link Request and Agent Escalation",
+      "Export Gmail accounts to custom tool",
+      "Integrate Mailbox with Custom Email Tool via Google Admin Client-ID",
+      "Email Inbox Export Failure",
+      "ReachInbox Export Failures Without Logs"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2e61337da38e56aa9b9299",
+        "title": "CSV Export Link Request and Agent Escalation",
+        "status": "OPEN",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "We can do that, can you share the 2fa code for instantly access",
+          "Please use API method to add the emails in instantly, since if you export via csv the mailboxes will be exported using IMAP method which is not ideal.  For adding emails to Instantly or any other tool the recommended method is via Aoth, which can be done via their export API as well. I can see you have tried to export the mailboxes twice but it failed because the API added is not correct, you can add the current API and re-export the mailboxes."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a1df40a817852f5bfe6a5c1",
+        "title": "Integrate Mailbox with Custom Email Tool via Google Admin Client-ID",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, I have checked with my dev team we don\u2019t have adding client id on the custom tool for now. But you can share the client id with us, we can get it added from our end for now whenever you create the mailboxes using APIs. Going forward we will add the option to add client id via API as well.",
+          "Hey Team, If you want us to add the client ID for all your mailboxes we can do that. You can share your client ID with us and we will automatically add them to all our mailboxes that we configure on our end.",
+          "Hey let's chat tomorrow?",
+          "https://cal.com/xquare/30min",
+          "You can book in a meeting here"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2cf5eea0e4732c7b6bb3e0",
+        "title": "Email Inbox Export Failure",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Let me check.",
+          "All mailboxes are connected to Smartlead now."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 5,
+    "topic": "deliverability",
+    "count": 87,
+    "sample_titles": [
+      "Google Sending Settings for 3 Inboxes per Domain",
+      "Inquiry about mailbox warmup tool",
+      "Mailbox Connection Error Preventing Inbox Access",
+      "Master inbox not connected to emails",
+      "Inquiry about Azure Inboxes Warm-up Time"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2cfd7163b6692add6a6d91",
+        "title": "Inquiry about mailbox warmup tool",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Moazzan, You can warm up the mailboxes by connecting them to an outreach platform such as Smartlead, Bison, Instantly, or a similar tool. These platforms include built-in warm-up features that help gradually build the sending reputation of your mailboxes before you begin outreach campaigns. If you need any assistance connecting your mailboxes to one of these platforms, just let us know and we'll be happy to help."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a295fe9d8a77641bd27c36d",
+        "title": "Master inbox not connected to emails",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, how may I help you?",
+          "Hey there, The Inbox section in Icemail is currently in beta and is still under development. As a result, you may see messages indicating that mailboxes are not connected. The Inbox feature will be fully rolled out in an upcoming update."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a27879893b70656179cbfe9",
+        "title": "Stuck Inboxes Processing Issue",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Matt, thanks for reaching out to us. I will look into this and get them processed in a few hours.",
+          "If those mailboxes, are already export to a Bison workspace, you can just select those mailboxes inside bison and click on move mailboxes to a different workspace. It does the job. It\u2019s the fastest way to do it",
+          "Thanks Matt, I will be around anytime you\u2019d need my help. I\u2019m the founder and you can ask for me if something goes around. Would be more than happy to help",
+          "Thanks Matt, Means a lot.  For domain renewals prices will be different"
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 6,
+    "topic": "team_access",
+    "count": 74,
+    "sample_titles": [
+      "Connected domain not accessible over HTTPS",
+      "Customer requests to talk to the team",
+      "Request to speak with support team",
+      "2FA Support Access Issue",
+      "OAuth MFA Requirement Causing Access Failures (AADSTS50076)"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2840b80f4f31a5f818556d",
+        "title": "Customer requests to talk to the team",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey, can we do a live test? Please send an email to  team@icemail.ai .",
+          "Send the email from the affected inboxes only. Let me know when you're ready, and we'll proceed with the live test.",
+          "Hey Hociking, We will replace your current  pre-warmed mailboxes. To do that, we first need to cancel the licensed mailboxes you previously purchased. Please let us know when you're ready. Once confirmed, we'll cancel the existing mailboxes and add the new pre-warmed mailboxes to your account. Thank you!",
+          "Our team is currently testing the domains. It will take time We've canceled those mailboxes and have added the new pre-warmed mailboxes for you.",
+          "additionally, I see you added the  adwizard.marketing  domain, showing existing workspace. To clear the workspace, you can use  this tool. Once the domain is free, you can assign mailboxes on that domain. https://toolbox.googleapps.com/apps/recovery/domain_in_use"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "69fbaefe6bae423addda6671",
+        "title": "Request to speak with support team",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Sure, we\u2019ll help you with that. Please share the domains you would like to reactivate, and we will check on our end.",
+          "Please confirm whether you would like to reactivate the existing mailboxes on the domain or create new mailboxes on it, so we can proceed accordingly. If you would like to reactivate the existing mailboxes, there will be a $4 charge per mailbox, as Google charges us once a license is canceled. If you prefer to create new mailboxes on the domain, we will need to delete the old mailboxes and clear the workspace. This process typically takes 24\u201348 hours. Once the workspace is cleared, new mailboxes can be assigned to the domain. Please let us know how you would like to proceed.",
+          "Just to clarify, this is based on Google\u2019s policy and not a charge from our side: If a domain is reactivated within 7 days of deletion, all mailboxes can be reactivated at $2.5 per mailbox. If the license has been suspended by Google, they apply a $4 per mailbox reactivation fee.",
+          "Sure, please share the domains.",
+          "Full name\t        Emails Mariana Ochoa\t mariana.o@area6-comunicacion.com Mariana Ochoa\t mariana@area6-comunicacion.com Alejandro Tafur\t alejandro.eyssautier@area6-comunicacion.com \t Alejandro Tafur\t alejandro@area-6.com Mariana Ochoa\t mariana@area-6.com Alejandro Tafur\t alejandro.eyssautier@area-6.com In the past, were these domain mailboxes created like this? Please confirm so I can proceed once the domain is free."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a29b63eb64c52957421fe14",
+        "title": "2FA Support Access Issue",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Let me check it and update it for you. I will be back shortly.",
+          "Yes, it's done now \u2014 2FA has been added."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 7,
+    "topic": "mailbox_error",
+    "count": 58,
+    "sample_titles": [
+      "No issue details provided",
+      "SSL Issuance Failure for Masked Domains",
+      "Inquiry: Timeframe to Resolve Instagram Technical Error",
+      "Clarification on 'failed' mailbox status",
+      "Instant export fails without error message"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2c53c130ba8c892e3a25d8",
+        "title": "SSL Issuance Failure for Masked Domains",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hi Cristobal, SSL certificate provisioning can sometimes take a bit longer to fully propagate. I've checked your domains, and they are successfully redirecting to the destination URL over https:// on our end. Could you please try opening the domain in an incognito/private browsing window? Sometimes browser cache can cause old redirect behavior to persist even after the SSL certificate has been issued."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2c31a8645801d20927f848",
+        "title": "Inquiry: Timeframe to Resolve Instagram Technical Error",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hi there, I'm sorry, but I couldn't fully understand the issue you're referring to. Could you please explain in more detail what error you're facing? A screenshot or any additional information would be helpful so we can assist you better."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a226cc339856792a821a9ad",
+        "title": "Clarification on 'failed' mailbox status",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey, we\u2019ll get all of them activated. You need not do anything on your end.",
+          "Hey Chris, You can create a maximum of 20 mailboxes per domain, but you exceeded the limit and created 23, which is why the mailbox statuses failed. I've now recreated the mailboxes while keeping the limit at 20 mailboxes per domain ,and all mailboxes are now active You can create the remaining mailboxes on the last domain, which is free and ready to use. Please let me know if you need any help.",
+          "Hey Chris, You can export all your mailboxes to Instantly through the UI. Simply select the mailboxes, click  Export Mailboxes , and choose  Instantly  as your outreach tool. Then fill in the required details, including your Instantly credentials and API key, and click  Continue  to start the export. Once the process is complete, your mailboxes will be connected to Instantly shortly.",
+          "Hey Chris, Your mailbox is already connected to your ReachInbox account.",
+          "For your last order of 16 mailboxes, 4 mailboxes were allocated to each of your domains. However, those domains had already reached the maximum limit of 20 mailboxes per domain. As a result, the order cannot be fulfilled. We'll deactivate the mailboxes from that order and refund the corresponding tokens to your account. To create additional mailboxes, you'll need to connect more domains and place a new order using those domains."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 8,
+    "topic": "dns_setup",
+    "count": 55,
+    "sample_titles": [
+      "Unresponsive \u2018Add New Record\u2019 Button When Adding CNAME",
+      "SPF/DMARC Setup Timing for zefido.net Domain",
+      "Request DNS records for reddybuddy.com",
+      "DNS Propagation After Adding Cloudflare Domains",
+      "Unable to Delete DNS Records in Icemail Dashboard"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2db4f786b57881a66991d2",
+        "title": "Unresponsive \u2018Add New Record\u2019 Button When Adding CNAME",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey dave, I will get it added from our side",
+          "Hey Dave, The DNS records have been added on our end. Could you please check from your side and confirm if everything looks good now? Looking forward to your confirmation."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2859a00f4f31a5f8bc1345",
+        "title": "SPF/DMARC Setup Timing for zefido.net Domain",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Abhinav, Once you assign mailboxes to the domain, all the necessary DNS records, including SPF, DKIM, and DMARC, will be added automatically.",
+          "We're currently experiencing very slow response times from the Microsoft API, which has resulted in a large number of mailboxes being queued for processing. Your mailboxes are still being processed and should be activated within the next few hours. We appreciate your patience and apologize for the delay.",
+          "Your mailbox is active now. Thank you for your patience."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a26ac88938ecfa0b383525f",
+        "title": "Request DNS records for reddybuddy.com",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Jahid, You don't need to add the DNS records manually. Since your domain is already using Cloudflare, you can simply use the Connect Cloudflare Domains option in the platform. Once the domain is connected, all the required DNS records will be automatically created and synced to your Cloudflare DNS. Just enter your Cloudflare email address and API token with the required permissions, and the system will handle the DNS setup automatically.",
+          "Could you please share your icemail user email so I can get you all the DNS records you want?",
+          "There doesn't appear to be any issue at the moment. As I can see, the mailboxes were created only a few minutes ago. Mailbox creation is not instant and depends on the current provisioning queue. Since it's only been about 3 minutes since the mailboxes were created, it's normal for them to still show as Processing.",
+          "Once the mailboxes become active, you'll be able to view all the DNS records directly from the platform. Simply go to Domains \u2192 Manage (next to the domain) \u2192 DNS Records, and you'll find all the required DNS records there.",
+          "It will take a few hours to get the mailbox active."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 9,
+    "topic": "microsoft_provisioning",
+    "count": 29,
+    "sample_titles": [
+      "Microsoft mailboxes provisioning delayed",
+      "Inquiry about Microsoft Azure inbox support",
+      "Missing DKIM Configuration for Microsoft Mailboxes",
+      "All Transferred Microsoft Inboxes Disconnected",
+      "Purchased Microsoft inboxes showing as Gmail"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2d44bb6f94321f5d488560",
+        "title": "Microsoft mailboxes provisioning delayed",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Rabee, Let me check.",
+          "Microsoft mailbox provisioning is currently a little slower compared to Google. The activation time can also vary depending on the current provisioning queue. I've checked, and your order is still being processed. The mailboxes should become active within the next few hours. Thank you for your patience, and we'll keep an eye on it.",
+          "Hey there, All the mailboxes are active now and ready to be exported.",
+          "You're welcome."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2ae377c4e6cdbb709e56d1",
+        "title": "Inquiry about Microsoft Azure inbox support",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Yes, we offer Microsoft Azure inboxes. They are currently not added to the Icemail dashboard, but you can purchase them. Let me check with my team, and I will give you an update on this.",
+          "At the moment, we do not offer bulk discounts for orders of 100, 200, or 300 mailboxes. However, if you're looking for more mailboxes, we can discuss custom pricing based on your requirements.",
+          "Hey Keenan Thank you for reaching out and for your continued interest in purchasing our mailboxes in bulk. We do provide discounts for customers who've already purchased 500 mailboxes from us previously, and are now looking to acquire more. We're happy to offer our special discounted pricing on any mailboxes purchased after 500: Google mailboxes : $2.30 each  Microsoft mailboxes : $2.00 each This rate is tailored specifically for valued, high-volume customers like you and reflects our commitment to helping you scale efficiently while maintaining strong deliverability. If this pricing works for you, could you please let me know the exact quantity you're planning to purchase this time?  We will contact you regarding how this will work in few days. Looking forward to hearing from you soon! Best regards,  Aman Sinha  Team Icemail"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2459e57f9c103e04ff46ae",
+        "title": "Missing DKIM Configuration for Microsoft Mailboxes",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Let me check that. I will be back with an update shortly.",
+          "Hey there, The setup has been updated, and all mailboxes are now ready for export."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 10,
+    "topic": "domain_connection",
+    "count": 28,
+    "sample_titles": [
+      "Domain Verification Required",
+      "Cannot Reconnect Domain: Active Google Mailbox Error",
+      "Email and Domain Setup Delay",
+      "Unable to connect domain to Cloudflare integration",
+      "Domain Connectivity Inquiry"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a29a1b7ce56fe070e00b9b0",
+        "title": "Domain Verification Required",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Daniyal, Your last order was placed on June 7th. The domain  testingdomainmno.com  associated with the order is currently showing as available for registration. Because of this, we have been unable to assign the mailboxes, and they have remained in the processing state. Could you please check with your domain registrar and confirm that you own and have access to this domain? Alternatively, we can register the domain on your behalf. The domain is currently available on our platform for $10. Please let us know how you'd like to proceed, and we'll be happy to assist. Looking forward to your reply. Best regards, Team Icemail"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a218ce732518ec08098b765",
+        "title": "Email and Domain Setup Delay",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, DNS propagation can sometimes take up to 24 hours, which may delay the setup process. That said, I'll take a look and see if there's anything we can do to expedite it from our side. I'll keep you posted with any updates."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a0db6cce11ea2442646e474",
+        "title": "Domain connection error: existing Google mailbox on proirongate.com",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Lucas, do you belong to the ai-acquisition team?",
+          "Let me resolve this for you.",
+          "The domain is now free. You can assign mailboxes to that domain now."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 11,
+    "topic": "google_workspace",
+    "count": 25,
+    "sample_titles": [
+      "Three Gmail Mailboxes Stuck in Processing State",
+      "Google Workspace mailboxes stuck processing and 2FA login errors",
+      "Two Google Mailboxes Stuck on Processing",
+      "Unable to Remove Cleared Google Workspace Domain",
+      "Existing Google Workspace Detected for services.in Domain"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2c7dfe357bdb1cd5e639f6",
+        "title": "Three Gmail Mailboxes Stuck in Processing State",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Let me check. I will update you once mailboxes become active.",
+          "Google Team is not available right now. I already sent this. They will be back in 3 to 4 hours. Please bear with us.",
+          "All mailboxes are active now."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a288553a9bef5691874177e",
+        "title": "Google Workspace mailboxes stuck processing and 2FA login errors",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, once mailboxes become active, you get 2FA next to the password.",
+          "Due to heavy traffic, some mailboxes are currently stuck in the processing stage, as Google is experiencing slower provisioning times than usual. We're actively monitoring the process and expect your mailboxes to become active within the next hour. We'll keep you updated on the progress. Once they are active, 2FA will also be enabled for all mailboxes.",
+          "Sure, I will update once they are active.",
+          "Hey there, We noticed that the password for the mailbox was changed. We don't recommend making password or security changes directly, as this can break the backend sync with our system and may put the mailbox at risk. If you need to access the mailbox at any time, you can use our dashboard to retrieve all the required login details. For any future changes, such as updating the password or other security settings, please reach out to us first. We'll make the changes on our side as well, ensuring everything stays properly synced and continues to work without issues.",
+          "We have reset your password as of now. Let us know if you want to make any changes."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a25123467ede4d50b624a98",
+        "title": "Two Google Mailboxes Stuck on Processing",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Let me check.",
+          "Processing mailboxes are active now.",
+          "Please note that while assigning mailboxes, make sure to create the required number of mailboxes in a single batch on a single domain. In some cases, if additional licenses are assigned after the mailboxes have already been created, the Google API may not process the new mailbox assignments correctly, which can lead to provisioning issues. To avoid this, we recommend creating all required mailboxes at once on the same domain during the initial setup."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 12,
+    "topic": "mailbox_provisioning",
+    "count": 22,
+    "sample_titles": [
+      "Google Workspace Mailbox Provisioning Stuck in Processing",
+      "Delay in Outlook mailbox provisioning",
+      "Missing DNS Mail Records and Stuck Mailbox Setup",
+      "Provisioning Issue for adam@allamprime.com and ryan@allamprime.com",
+      "Slow Domain and Mailbox Provisioning"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2ac0baa48b8c4bedc14a5d",
+        "title": "Google Workspace Mailbox Provisioning Stuck in Processing",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Let me check.",
+          "All your mailboxes are active now.",
+          "Hey there, We have activated all currently processed mailboxes. Sometimes new mailboxes remain in processing if the DNS settings are not yet complete, and it can take a few hours for them to become active. Please wait a little longer.",
+          "All Google mailboxes are active now.",
+          "Hey there, App passwords have been updated successfully."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a27a8ac3b13065b2383ac8f",
+        "title": "Delay in Outlook mailbox provisioning",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Christoph, Microsoft mailboxes typically take longer to activate compared to Google mailboxes. Mailbox processing also depends on the current queue, and we already have a number of mailboxes waiting to be processed. That's why activation is taking a bit longer than usual. I've marked this as a priority with the team, and your mailboxes should be active within the next few hours. Thank you for your patience!",
+          "Hey Christoph, Let me check this. Please allow some time to troubleshoot the issue. I will update you in a few hours.",
+          "Hey Christoph, All your disconnected mailboxes are now connected."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a287958512f9f2e47f16117",
+        "title": "Missing DNS Mail Records and Stuck Mailbox Setup",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Anton, Let me check",
+          "The issue has been resolved. All necessary DNS records, including MX, SPF, DKIM, and DMARC, have now been added to the domain. Additionally, the mailbox that was stuck in processing has been activated and is now active. Please let us know if there's anything else we can help with.",
+          "You\u2019re welcome!"
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 13,
+    "topic": "smtp_errors",
+    "count": 15,
+    "sample_titles": [
+      "Multiple Email Accounts Showing SMTP Errors and Disconnected Status in Reachinbox",
+      "Invalid app password for steve@getrankos.us \u2013 needs regeneration",
+      "Some Google Mailboxes Lack App Passwords",
+      "Missing CSV Export Email for SMTP Details",
+      "Request for Gmail App Passwords for Six Inboxes"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2eb7f78cb7f2f6fcad5bd0",
+        "title": "Invalid app password for steve@getrankos.us \u2013 needs regeneration",
+        "status": "OPEN",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there,  Sure let me check it once",
+          "Hey there, i checked your password was change 3 days back.  Please don\u2019t change email passwords since we need access for adding client id and other info",
+          "Then it might be done during automation, since account was created on 11th only.  No worries i will reset it.",
+          "Password change is done, you can login now"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2b105c3277845a37d218c8",
+        "title": "Some Google Mailboxes Lack App Passwords",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Let me check.",
+          "The mailboxes are still being processed. Once they become active, you'll be able to see the app passwords in the CSV file.",
+          "Hey there, All your mailboxes are now active and ready to export. For the Google mailboxes, it usually takes 30\u201360 min to become fully active. For the Microsoft mailboxes, it can take a bit longer, since Microsoft generally takes more time than Google to fully activate and get ready.",
+          "I have re-triggered it. In some time, it will be updated.",
+          "Hey there, App passwords have been updated successfully for both Google and Microsoft accounts."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "69fbd9e0b5a6fb980ef3de1c",
+        "title": "SMTP Connection Failure with Atomic",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Could you please elaborate a bit more so I can assist you better?",
+          "Are the mailboxes connected successfully, or are you facing any issue while connecting them?",
+          "The SMTP settings look correct for Google mailboxes. Could you please let me know what exact error you\u2019re getting while connecting them?",
+          "Yes, the issue is related to the App Password. You can get the App Password by downloading the CSV file: Select the mailboxes Click on Export Mailboxes Then click Export CSV File The CSV file will contain the App Password details for the mailboxes. Please use that App Password instead of the regular mailbox password while connecting to Atomic Sender.",
+          "You can also get the 2FA code directly from the dashboard by clicking on the shield icon next to the password field."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 14,
+    "topic": "pre_warmed",
+    "count": 15,
+    "sample_titles": [
+      "Inquiry About Prewarmed Inbox Options",
+      "Forward Pre-warmed Domains & Update Mailbox Profile Pictures",
+      "Domain Verification and DNS Management for Prewarmed Domains",
+      "Request to Delete Trygrowthspark.info Pre-Warmed Mailboxes and Domain",
+      "How to Upload Leads for Email Campaigns with Warmed-Up Domains"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a269b2d0e8a6f158c705369",
+        "title": "Forward Pre-warmed Domains & Update Mailbox Profile Pictures",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Joy, Sure, we can do that for you. Please share the details here, and we will let you know once it's done.",
+          "Sure, I\u2019ll get it done and let you know once they\u2019re added.",
+          "The mailboxes have completed 5 weeks of warm-up, you can start with 30\u201350 emails per day per mailbox and gradually increase based on performance. We also recommend keeping warm-up enabled at 10\u201320 emails per day for a few more weeks. Yes, you can add the mailboxes to warm-up in your Smartlead account as well.",
+          "Pre-warmed mailboxes do have some limitations. That said, we've already added the domain forwarding, and the profile pictures are currently being configured. The remaining setup should be completed shortly.",
+          "Do you have any suggested passwords for the mailboxes? Once we have them, we\u2019ll add the mailboxes from our end."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a08cdea631742730b7f3dae",
+        "title": "Request to Delete Trygrowthspark.info Pre-Warmed Mailboxes and Domain",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Jordan, Sure, we\u2019ll cancel the domain  rygrowthspark.info . You will not be charged for the mailboxes going forward."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "69c53ee26fc3f338e6b8b99d",
+        "title": "How to Upload Leads for Email Campaigns with Warmed-Up Domains",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey, You\u2019ll need to pay the regular mailbox subscription ($5/month per mailbox). Also, we don\u2019t send emails directly from our platform. You\u2019ll need to export the mailboxes to an outreach tool like Instantly or Smartlead to send campaigns.",
+          "You can export your mailboxes from the Icemail dashboard and then import them into Instantly.",
+          "let me check on this.",
+          "Instantly\u2019s free trial only allows up to 2 connected accounts. If you\u2019re trying to export and add more mailboxes, you\u2019ll need to upgrade your Instantly plan.",
+          "yes"
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 15,
+    "topic": "delete_cancel",
+    "count": 15,
+    "sample_titles": [
+      "Cancel 30 Mailboxes on thecatthrone Domain",
+      "Missing details for alfiecom.com cancellation",
+      "Cancellation Request for alfiecom.com",
+      "Request to Cancel Mailboxes and Domains",
+      "Domain Cancellation Request for thenexusq.com"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a1072a0ca36b1934191092f",
+        "title": "Missing details for alfiecom.com cancellation",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "I deleted the mailboxes for the given domain from the UI level, so you will not be charged in the next billing cycle. Full deletion may take 24\u201348 hours to complete."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a107217a7e80fb2bc29e368",
+        "title": "Cancellation Request for alfiecom.com",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Sure, I will cancel your domain.",
+          "Sure, I will update you.",
+          "I deleted the mailboxes for the given domain from the UI level, so you will not be charged in the next billing cycle. Full deletion may take 24\u201348 hours to complete."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a026a501091ed0909f63c35",
+        "title": "Request to Cancel Mailboxes and Domains",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Jamie, Sure we will delete the email accounts from backed,  going forward you won\u2019t be charged for the emails.  Regarding the wallet balance transfer - please note that Stripe processing fees have already been charged on the payment, so we\u2019re only able to issue a partial refund. Let me know if you are ok with the partial refund, i will process it immediately.",
+          "Got it, We will initiate the process and update you once everything is done from our end.",
+          "Hey Jamie, All mailboxes across both workspaces \u2014 \u201cFlow\u201d and \u201cNet Atelier\u201d \u2014 have been deactivated and are currently in the process of permanent deletion. Regarding the refund, I still need confirmation from the billing team. I\u2019ll update you as soon as I receive any information from them.",
+          "Let me check.",
+          "I missed rechecking earlier. I\u2019ve now verified from our end that the Net Atelier mailboxes are still active and were not included in the deletion process. Only the \u201cFlow\u201d workspace mailboxes were deactivated and moved for permanent deletion."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 16,
+    "topic": "mailbox_login",
+    "count": 12,
+    "sample_titles": [
+      "Request to Change YouTube Login Email",
+      "Request to Disable OTP for iCemail Login",
+      "Re: please share your Plusvibe credentials #2605",
+      "please share your Plusvibe credentials",
+      "Unable to log into certain mailboxes"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2ea8398cb7f2f6fc66a861",
+        "title": "Request to Change YouTube Login Email",
+        "status": "OPEN",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Anej, We will need to reactivate the account mentioned above to access the email after that maybe you can transfer your youtube.  Also i am not sure how you can transfer youtube owner, please check on that before you take decision to reactivate the mailbox"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a2a2c182610653764203471",
+        "title": "Request to Disable OTP for iCemail Login",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "We can't remove 2FA, as it is managed automatically as part of the mailbox security setup. If we disable 2FA, it may affect the mailbox configuration."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a153b08b75a15afbc7258e8",
+        "title": "Re: please share your Plusvibe credentials #2605",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Here is the CSV",
+          "I will update you once the mailboxes are exported in Plusvibe.",
+          "Hey Christoph, All the mailboxes are exported successfully in Plusvibe."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 17,
+    "topic": "pricing",
+    "count": 11,
+    "sample_titles": [
+      "Bulk Pricing Discount for Mailbox Purchase",
+      "Mailbox Deletion Request for mike@costiganconsulting.live",
+      "Request for Pricing Information",
+      "Pricing Inquiry: 10,000-Lead Cold Email Campaign on ETIS",
+      "Assist with Gmail Account Setup for 14 Domains & Pricing Inquiry"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "69a3dfac8b351b81e23eadf3",
+        "title": "Bulk Pricing Discount for Mailbox Purchase",
+        "status": "OPEN",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Brandon, Thank you for reaching out and for your continued interest in purchasing our mailboxes in bulk\u2014we truly value your business and are excited to support your growing needs. I see you've already purchased 500 mailboxes from us previously, and you're now looking to acquire more. We're happy to offer our special discounted pricing: Google mailboxes : $2.30 each Microsoft mailboxes : $2.00 each This rate is tailored specifically for valued, high-volume customers like you and reflects our commitment to helping you scale efficiently while maintaining strong deliverability. If this pricing works for you, could you please let me know the exact quantity you're planning to purchase this time?  We will contact you regarding how this will work in few days. Looking forward to hearing from you soon! Best regards,  Aman Sinha  Team Icemail",
+          "Hey Brandon, We can apply the same discount for all your future mailbox purchases as well. You can purchase the mailboxes at $2.5 and once done. Ping us on the chat and I will add the discount back to your wallet",
+          "Hey Brandon, We will add the discounts in your wallet and change the price on the UI for future purchases.",
+          "Hey Brandon, New pricing is applied on your workspace check once.  And i will calculate and add amount in your wallet for the already purchased new mailboxes.  It will take 1 day since team is not available right now, we will update your once the amount is added to your wallet."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "69ff43072bfee23d59c3d4a0",
+        "title": "Mailbox Deletion Request for mike@costiganconsulting.live",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "As per Google\u2019s policy, deletions must happen at the Workspace level. This means that when we delete one mailbox from a domain, the entire Workspace including all mailboxes under that domain gets removed. So, please share the domains you would like to remove, and we will proceed accordingly.",
+          "Sure, we will delete the mailboxes from our UI under this domain, so you won\u2019t be charged in the next billing cycle. The full deletion process usually takes around 24\u201348 hours to complete.",
+          "Yes, need to buy 1 Google token first to assign mailboxes."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "69fe8df1de64b49407123ab5",
+        "title": "Request for Pricing Information",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Rahul, How can I help you today?"
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 18,
+    "topic": "domain_forwarding",
+    "count": 10,
+    "sample_titles": [
+      "Domain Forwarding Not Working",
+      "Ancillary domain forwarding not functioning",
+      "Secondary Domain Forwarding Not Working",
+      "Setting Domain Forwarding Destination URL",
+      "UTM Parameters Stripped from Domain Redirects"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2c5bd8c4bdee0e3e35035f",
+        "title": "Domain Forwarding Not Working",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "It is fixed, please check now."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a171660b2b9d5651699e404",
+        "title": "Ancillary domain forwarding not functioning",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Domain forwarding means redirecting web traffic from one domain to another, like wingmangrowth.ai to wingmangrowth.com, so visitors land on the chosen site. If the forwarding just keeps loading without redirecting, it might be a setup glitch either in the forwarding URL or the domain settings. It's good to double-check the forwarding URL includes \"https://\" and that settings are saved properly. Also, forwarding doesn't affect email delivery but can cause issues if email authentication like DMARC isn't configured correctly. Let me know if you want help checking your specific setup.",
+          "Hey there, The domain forwarding is working now; can you please check.",
+          "You're welcome"
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6a056eb5bc8dcb1dfa7be035",
+        "title": "Secondary Domain Forwarding Not Working",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Let me check.",
+          "I checked and the domain is now properly redirecting to the secured HTTPS version:  https://struxent.com Everything looks good from our end now. Could you please check again from your side and let me know if the issue has been resolved?",
+          "Yes, those login attempts are from our automation processes running in the background for mailbox monitoring and setup checks. Your account is secure, and there\u2019s nothing to worry about from those activities.",
+          "No, nobody can see the contents of your emails.",
+          "Your mailbox data and emails remain secure and private."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 19,
+    "topic": "domain_purchase",
+    "count": 8,
+    "sample_titles": [
+      "Unable to Add New Domain",
+      "Brand new domains mistakenly blacklisted",
+      "Domain purchase failure for roguepetsciencesite.com and proroguepetscience.com",
+      "Unexpected $5 Annual Fee on Domain Purchase",
+      "Request to Add New Domains to Mailboxes"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2c64ba97815a6097317578",
+        "title": "Unable to Add New Domain",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Please check the NS it is not pointing to Cloudflare.",
+          "The NS is not fully propagated yet. It will take 1 hour to fully propagate. Once the NS is propagated, the domain will become active.",
+          "It is active now.",
+          "We can\u2019t set up two 2FA codes on one mailbox. All mailboxes have their own 2FA setups.",
+          "Sure, I will trigger the 2FA. It will reflect in some time."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "69f21706db998e3f71f3da3e",
+        "title": "Brand new domains mistakenly blacklisted",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "69d20177567d5f12be3494d9",
+        "title": "Request to Add New Domains to Mailboxes",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey  there, Sure, I\u2019ll proceed with creating your mailboxes shortly.",
+          "I\u2019ve assigned the mailboxes to the domains you specified. They are expected to become active within approximately one hour.",
+          "Kindly verify once they are active and let me know if you require any further assistance."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 20,
+    "topic": "sending_limits",
+    "count": 4,
+    "sample_titles": [
+      "6 of 15 Emails Failed; Requesting Troubleshooting",
+      "Upload 15 Emails to PlusVibe",
+      "Inquiry: Daily Email Sending Limits per Account",
+      "Inquiry about email sending limits and ramp-up strategy"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "69e8f2eefccd689a38e16fb7",
+        "title": "6 of 15 Emails Failed; Requesting Troubleshooting",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hi there, Let me check that for you, and I'll update you shortly.",
+          "your mailboxes are now active and ready for export.",
+          "The issue has now been resolved, and we\u2019ll be closing this ticket. If you have any further questions, feel free to reply here, or you can always create a new ticket\u2014we\u2019re happy to assist!",
+          "Yes your emails will be there on Icemail dashboard, and you can continue to manage them here.",
+          "You're welcome."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "6988f6f1ca554f7aa7d0a1bf",
+        "title": "Inquiry: Daily Email Sending Limits per Account",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there,  For sending 500 emails a day you will need 40 mailboxes",
+          "Both Google/Microsoft Infra are almost similar,  3 Mailboxes per domain works best for both",
+          "Yes, you can login to admin using admin email for each domain."
+        ],
+        "customer_accepted": "no_customer_msg"
+      },
+      {
+        "ticket_id": "68dadfab06d156cd07604152",
+        "title": "Inquiry about email sending limits and ramp-up strategy",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Its 20 emails per mailbox in a day",
+          "We recommend starting with  5 emails  and increasing by  10-20%  daily."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 21,
+    "topic": "mailbox_forwarding",
+    "count": 3,
+    "sample_titles": [
+      "Unable to Stop Email Forwarding",
+      "Residual Email Forwarding to sales@eevidence.com Persists",
+      "Email forwarding settings stuck on 'Updating' for three mailboxes"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a0ebd350b5229c2a72173cc",
+        "title": "Residual Email Forwarding to sales@eevidence.com Persists",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, I checked your account. The email forwarding was added in the wrong place \u2014 it was added in the DMARC email section instead of the mailbox forwarding section. To correctly set up forwarding, you need to: Go to the Mailboxes section Select the mailboxes Click on \u201cMailbox Actions\u201d Choose \u201cAdd Email Forwarding\u201d Enter the forwarding email address and save I have now added email forwarding for all 54 mailboxes to  eevidence@natconsulting.es . It may take some time to fully update and sync from our side."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 22,
+    "topic": "white_label",
+    "count": 1,
+    "sample_titles": [
+      "White-label Solution Request"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6a2ea5a992222f3c7a1b37c6",
+        "title": "White-label Solution Request",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Taimoor,  Lets get on a call to discuss. You can book a timeslot using the following link. https://cal.com/timvadde/30min?overlayCalendar=true"
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 23,
+    "topic": "mailbox_schedule",
+    "count": 1,
+    "sample_titles": [
+      "Request to schedule evaluation call"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "69dfa7ed574aa7983b48c30b",
+        "title": "Request to schedule evaluation call",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Vatsal",
+          "I see you\u2019re from resellerclub?",
+          "I am already in touch with Ravi",
+          "Is it about Google mailboxes?"
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 24,
+    "topic": "bulk_domain",
+    "count": 1,
+    "sample_titles": [
+      "Bulk Domain Activation Delay"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "6978e5cd9fd8d8e1310a093d",
+        "title": "Bulk Domain Activation Delay",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Matt, It will done in some time, DNS propagation is taking time.",
+          "Hey Matt, All your domains are active except for  farmersagencycareer.com",
+          "We havent processed the purchase of this domain as it had an existing google workspace.",
+          "We will add the credits back to your wallet. You can go ahead and purchase another domain",
+          "Matt, we\u2019ve added the domain credits to your account"
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 25,
+    "topic": "bulk_mailbox",
+    "count": 1,
+    "sample_titles": [
+      "Cannot click Next after bulk uploading 250 mailboxes"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "694e8c10135be4439f3dc16c",
+        "title": "Cannot click Next after bulk uploading 250 mailboxes",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey there, Are you using any CSV to add these ? If yes can you share the CSV with me once. i will check from my end.",
+          "Yes domains are fine, i checked it.",
+          "Hey i was checking the data, can you confirm this data is fine",
+          "There is one mailbox creation request with Dummy names",
+          "Since dummy name was used with Caps in username, it was throwing error."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 26,
+    "topic": "custom_domain",
+    "count": 1,
+    "sample_titles": [
+      "Assistance With Connecting Existing Domains"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "693c6720f6ec4ad1f90352f9",
+        "title": "Assistance With Connecting Existing Domains",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Mike",
+          "How can I help you?"
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 27,
+    "topic": "tracking_domain",
+    "count": 1,
+    "sample_titles": [
+      "Configuring Purchased Domains as Tracking Domains"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "690cda3767cb42ce3e7fd428",
+        "title": "Configuring Purchased Domains as Tracking Domains",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Shawn, Totally makes sense\u2014great question! Option 1  (Recommended for simplicity): Use the  same domain  for inbox + tracking. Example: Inbox:  shawn@paintestimatorglobal.com Tracking domain:  paintestimatorglobal.com  (just add the CNAME) Option 2  (Extra deliverability boost): Use a  different domain  just for tracking. Example: Inbox:  shawn@paintestimatorglobal.com Tracking domain:  meetpaintestimator.com  (or any of your 16 variations) Pro tip: Most agencies go with Option 2 when scaling\u2014it keeps reputation completely separated between sending and tracking. But if you want to keep it dead simple right now, Option 1 is totally safe and widely used."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  },
+  {
+    "rank": 28,
+    "topic": "account_setup",
+    "count": 1,
+    "sample_titles": [
+      "Delay in Outlook Account Creation"
+    ],
+    "conversations": [
+      {
+        "ticket_id": "689e4b716379ba4f37438ce6",
+        "title": "Delay in Outlook Account Creation",
+        "status": "DONE",
+        "conversationClosed": false,
+        "customer_questions": [],
+        "agent_answers": [
+          "Hey Kevin",
+          "Outlook mailboxes typically only take a few minutes. Since we\u2019ve got a huge influx of users. We have been facing some delays with Microsoft inboxes setup time.  Rest assured it\u2019ll be setup in the next few hours. We\u2019re also releasing a new update very soon where Microsoft inboxes would be setup in a matter of minutes. Thank you."
+        ],
+        "customer_accepted": "no_customer_msg"
+      }
+    ]
+  }
+]
