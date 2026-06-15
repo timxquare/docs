@@ -1,0 +1,16 @@
+{
+  "name": "stripe-webhook",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "stripe": "^16.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.78.0"
+  }
+}
