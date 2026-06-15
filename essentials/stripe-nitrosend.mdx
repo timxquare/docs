@@ -1,0 +1,367 @@
+---
+title: "Stripe + Nitrosend"
+description: "Send transactional emails on Stripe payment and subscription events using Nitrosend automation flows."
+---
+
+## Overview
+
+This integration fires Nitrosend automation flows when Stripe events occur — payment receipts, failed payment alerts, welcome emails on new subscriptions, and win-back emails on cancellation.
+
+**Flows created in Nitrosend:**
+
+| Flow | Trigger event | Steps |
+|------|--------------|-------|
+| Payment Succeeded | `stripe_payment_succeeded` | Receipt email |
+| Payment Failed | `stripe_payment_failed` | Alert email → wait 24h → reminder email |
+| Subscription Created | `stripe_subscription_created` | Welcome email |
+| Subscription Cancelled | `stripe_subscription_cancelled` | Cancellation + win-back email |
+
+---
+
+## How it works
+
+1. Stripe fires a webhook to your server
+2. Your server verifies the signature and extracts the relevant data
+3. Your server calls the Nitrosend API to upsert the contact and fire the custom event
+4. Nitrosend triggers the matching automation flow and sends the email
+
+---
+
+## Webhook handler
+
+Install dependencies:
+
+```bash
+npm install stripe
+```
+
+Set environment variables:
+
+```bash
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NITROSEND_API_KEY=ns_live_...
+```
+
+<CodeGroup>
+
+```typescript TypeScript (Express)
+import express from "express";
+import Stripe from "stripe";
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const NITROSEND_API = "https://api.nitrosend.com/v1/my";
+
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"] as string;
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET!
+      );
+    } catch {
+      return res.status(400).send("Webhook signature verification failed");
+    }
+
+    try {
+      await handleStripeEvent(event);
+      res.json({ received: true });
+    } catch (err) {
+      console.error("Nitrosend event failed:", err);
+      res.status(500).json({ error: "Failed to forward event" });
+    }
+  }
+);
+
+async function handleStripeEvent(event: Stripe.Event) {
+  switch (event.type) {
+    case "payment_intent.succeeded": {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      const customer = await resolveCustomer(pi.customer as string);
+      await nitrosendEvent(customer, "stripe_payment_succeeded", {
+        amount: formatAmount(pi.amount, pi.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: pi.metadata?.invoice_id ?? "",
+      });
+      break;
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const customer = await resolveCustomer(invoice.customer as string);
+      await nitrosendEvent(customer, "stripe_payment_failed", {
+        amount: formatAmount(invoice.amount_due, invoice.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: invoice.id,
+        failure_reason: invoice.last_finalization_error?.message ?? "Card declined",
+        card_last4: await getCardLast4(invoice.customer as string),
+      });
+      break;
+    }
+    case "customer.subscription.created": {
+      const sub = event.data.object as Stripe.Subscription;
+      const customer = await resolveCustomer(sub.customer as string);
+      await nitrosendEvent(customer, "stripe_subscription_created", {
+        plan: sub.items.data[0]?.price.nickname ?? "Pro",
+        subscription_id: sub.id,
+      });
+      break;
+    }
+    case "customer.subscription.deleted": {
+      const sub = event.data.object as Stripe.Subscription;
+      const customer = await resolveCustomer(sub.customer as string);
+      await nitrosendEvent(customer, "stripe_subscription_cancelled", {
+        period_end: new Date(sub.current_period_end * 1000).toLocaleDateString(),
+        subscription_id: sub.id,
+      });
+      break;
+    }
+  }
+}
+
+// Upsert contact + fire event in one call
+async function nitrosendEvent(
+  customer: { email: string; name?: string },
+  eventName: string,
+  data: Record<string, string>
+) {
+  const [firstName, ...rest] = (customer.name ?? "").split(" ");
+  const headers = {
+    Authorization: `Bearer ${process.env.NITROSEND_API_KEY}`,
+    "Content-Type": "application/json",
+  };
+
+  // 1. Upsert contact
+  await fetch(`${NITROSEND_API}/contacts`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      email: customer.email,
+      first_name: firstName || undefined,
+      last_name: rest.join(" ") || undefined,
+      subscribed_email: true,
+    }),
+  });
+
+  // 2. Fire event
+  await fetch(`${NITROSEND_API}/events`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      event: eventName,
+      contact: { email: customer.email },
+      data,
+    }),
+  });
+}
+
+async function resolveCustomer(customerId: string) {
+  const customer = await stripe.customers.retrieve(customerId);
+  if (customer.deleted) throw new Error("Customer deleted");
+  return { email: customer.email!, name: customer.name ?? undefined };
+}
+
+async function getCardLast4(customerId: string): Promise<string> {
+  const methods = await stripe.paymentMethods.list({
+    customer: customerId,
+    type: "card",
+    limit: 1,
+  });
+  return methods.data[0]?.card?.last4 ?? "••••";
+}
+
+function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(amount / 100);
+}
+
+app.listen(3000);
+```
+
+```javascript JavaScript (Express)
+const express = require("express");
+const Stripe = require("stripe");
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const NITROSEND_API = "https://api.nitrosend.com/v1/my";
+
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch {
+      return res.status(400).send("Webhook signature verification failed");
+    }
+
+    try {
+      await handleStripeEvent(event);
+      res.json({ received: true });
+    } catch (err) {
+      console.error("Nitrosend event failed:", err);
+      res.status(500).json({ error: "Failed to forward event" });
+    }
+  }
+);
+
+async function handleStripeEvent(event) {
+  switch (event.type) {
+    case "payment_intent.succeeded": {
+      const pi = event.data.object;
+      const customer = await resolveCustomer(pi.customer);
+      await nitrosendEvent(customer, "stripe_payment_succeeded", {
+        amount: formatAmount(pi.amount, pi.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: pi.metadata?.invoice_id ?? "",
+      });
+      break;
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object;
+      const customer = await resolveCustomer(invoice.customer);
+      await nitrosendEvent(customer, "stripe_payment_failed", {
+        amount: formatAmount(invoice.amount_due, invoice.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: invoice.id,
+        failure_reason: invoice.last_finalization_error?.message ?? "Card declined",
+        card_last4: await getCardLast4(invoice.customer),
+      });
+      break;
+    }
+    case "customer.subscription.created": {
+      const sub = event.data.object;
+      const customer = await resolveCustomer(sub.customer);
+      await nitrosendEvent(customer, "stripe_subscription_created", {
+        plan: sub.items.data[0]?.price.nickname ?? "Pro",
+        subscription_id: sub.id,
+      });
+      break;
+    }
+    case "customer.subscription.deleted": {
+      const sub = event.data.object;
+      const customer = await resolveCustomer(sub.customer);
+      await nitrosendEvent(customer, "stripe_subscription_cancelled", {
+        period_end: new Date(sub.current_period_end * 1000).toLocaleDateString(),
+        subscription_id: sub.id,
+      });
+      break;
+    }
+  }
+}
+
+async function nitrosendEvent(customer, eventName, data) {
+  const [firstName, ...rest] = (customer.name ?? "").split(" ");
+  const headers = {
+    Authorization: `Bearer ${process.env.NITROSEND_API_KEY}`,
+    "Content-Type": "application/json",
+  };
+
+  await fetch(`${NITROSEND_API}/contacts`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      email: customer.email,
+      first_name: firstName || undefined,
+      last_name: rest.join(" ") || undefined,
+      subscribed_email: true,
+    }),
+  });
+
+  await fetch(`${NITROSEND_API}/events`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      event: eventName,
+      contact: { email: customer.email },
+      data,
+    }),
+  });
+}
+
+async function resolveCustomer(customerId) {
+  const customer = await stripe.customers.retrieve(customerId);
+  return { email: customer.email, name: customer.name };
+}
+
+async function getCardLast4(customerId) {
+  const methods = await stripe.paymentMethods.list({
+    customer: customerId,
+    type: "card",
+    limit: 1,
+  });
+  return methods.data[0]?.card?.last4 ?? "••••";
+}
+
+function formatAmount(amount, currency) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(amount / 100);
+}
+
+app.listen(3000);
+```
+
+</CodeGroup>
+
+---
+
+## Register the webhook in Stripe
+
+Point your Stripe webhook to `/webhooks/stripe` and subscribe to these events:
+
+- `payment_intent.succeeded`
+- `invoice.payment_failed`
+- `customer.subscription.created`
+- `customer.subscription.deleted`
+
+You can register via the Stripe CLI for local testing:
+
+```bash
+stripe listen \
+  --events payment_intent.succeeded,invoice.payment_failed,customer.subscription.created,customer.subscription.deleted \
+  --forward-to localhost:3000/webhooks/stripe
+```
+
+---
+
+## Merge tags
+
+The event `data` object you pass to Nitrosend is available as `{{ event.* }}` merge tags inside your flow email templates.
+
+| Tag | Source |
+|-----|--------|
+| `{{ event.amount }}` | Formatted charge or invoice amount |
+| `{{ event.date }}` | Event date |
+| `{{ event.invoice_id }}` | Stripe invoice ID |
+| `{{ event.failure_reason }}` | Decline reason (payment failed) |
+| `{{ event.card_last4 }}` | Last 4 digits of card (payment failed) |
+| `{{ event.period_end }}` | Subscription end date (cancellation) |
+| `{{ contact.first_name }}` | Contact first name (Nitrosend contact field) |
+
+---
+
+## Activate flows
+
+Once you've added a physical address to your Nitrosend brand (required for CAN-SPAM), activate each flow from the [Nitrosend dashboard](https://app.nitrosend.com/my/flows) or via the MCP:
+
+```
+activate the stripe_payment_succeeded flow
+```
