@@ -1,0 +1,59 @@
+---
+title: "⚠️ Fixing the 'Workspace Already Exists' Error in Icemail"
+description: "How to resolve the 'Workspace already exists' error when connecting a Google or Microsoft domain to Icemail."
+gleap_id: "6a2f9df604c6cab476ac839c"
+gleap_collection: "6849b63fe92e06806c87c22a"
+gleap_collection_slug: "domain-management"
+isDraft: false
+---
+
+When connecting a domain to Icemail, you may encounter a **"Workspace already exists"** error.
+
+This happens because both Google Workspace and Microsoft 365 allow only **one active workspace per domain**. If a workspace was previously created or is still active for that domain, the connection will fail.
+
+---
+
+### Google Workspace Solutions
+
+#### Case 1 – You Previously Created a Google Workspace
+
+If you set up a Google Workspace on this domain before:
+
+- Go to Google Admin Console
+- **Billing** → **Subscriptions** → find your subscription → **Cancel Subscription**
+- After canceling, proceed to delete the workspace entirely
+- Wait 24 hours before reconnecting the domain in Icemail
+
+**Important:** Canceling the subscription alone is not enough — the workspace must be fully deleted.
+
+#### Case 2 – The Domain Was Owned by a Previous Google Account
+
+If the domain was previously associated with another Google account:
+
+- Use the **Google Domain In-Use Recovery Tool** to reclaim ownership
+- Follow Google's verification steps
+- Wait several hours after recovery before reconnecting to Icemail
+
+---
+
+### Microsoft 365 Solution
+
+If you previously connected this domain to Microsoft 365:
+
+- Go to **Microsoft Admin Center**
+- **Settings** → **Domains**
+- Select the domain → click **Remove domain**
+- Click **Update** → **Continue** to confirm removal
+- Wait before reconnecting the domain in Icemail
+
+---
+
+### Key Notes
+
+- Subscription cancellation alone is not sufficient — full deletion is required
+- Icemail cannot override platform-level restrictions imposed by Google or Microsoft
+- If the domain had a previous owner, use the appropriate recovery tool before reconnecting
+
+---
+
+**Need help?** Contact our support team at **team@icemail.ai**.

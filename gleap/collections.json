@@ -60,5 +60,45 @@
     },
     "description": {},
     "iconUrl": "https://staticfiles.gleap.io/gfeedback_widgets/oiQEBNJ8mBFPzMrzXyyqxOSCd1EmahlrA6R7grb1DBWL7LT6MKcOK2vzba19IJSUidlihnpSPrS.png"
+  },
+  {
+    "id": "6a2f9dacf10a74503708e7c7",
+    "slug": "getting-started",
+    "title": {
+      "en": "Getting Started"
+    },
+    "description": {
+      "en": "Everything you need to get up and running with Icemail—account setup, workspace configuration, DNS, and cold email best practices."
+    }
+  },
+  {
+    "id": "6a2f9dada624d0c7c7aae3fc",
+    "slug": "deliverability-tools",
+    "title": {
+      "en": "Deliverability Tools"
+    },
+    "description": {
+      "en": "Tools and features to protect your domain reputation, monitor inbox placement, and maximize email deliverability."
+    }
+  },
+  {
+    "id": "6a2f9dad04c6cab476ac6e9a",
+    "slug": "high-reputation-domains",
+    "title": {
+      "en": "High Reputation Domains"
+    },
+    "description": {
+      "en": "Pre-aged, high-reputation domains ready for cold email campaigns with established sender credibility."
+    }
+  },
+  {
+    "id": "6a2f9dadbd74054991475f24",
+    "slug": "pre-warmed-domains-mailboxes",
+    "title": {
+      "en": "Pre-warmed Domains & Mailboxes"
+    },
+    "description": {
+      "en": "Get started faster with pre-warmed mailboxes and domains that are already optimized for cold email sending."
+    }
   }
 ]

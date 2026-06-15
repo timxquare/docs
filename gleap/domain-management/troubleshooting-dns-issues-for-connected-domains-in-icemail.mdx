@@ -1,0 +1,69 @@
+---
+title: "🔍 Troubleshooting DNS Issues for Connected Domains in Icemail"
+description: "Step-by-step guide for resolving Inactive domain status, NS not pointing to Icemail, DNS propagation delays, and missing SPF/DKIM/DMARC/MX records."
+gleap_id: "6a2f9df6005f91f2062479ee"
+gleap_collection: "6849b63fe92e06806c87c22a"
+gleap_collection_slug: "domain-management"
+isDraft: false
+---
+
+When a connected domain shows as 
+
+**Inactive** in your Icemail dashboard, it usually means one of the following:
+
+- NS (Nameserver) records are not pointing to Icemail
+- DNS has not yet propagated
+- SPF, DKIM, DMARC, or MX records are missing
+
+---
+
+### Step 1: Check Domain Status in Icemail Dashboard
+
+Log in to your Icemail dashboard and navigate to the **Domains** section.
+
+Look for status labels such as:
+
+- **Inactive** — domain not verified yet
+- **DNS not propagating** — nameservers updated but not resolved globally
+
+---
+
+### Step 2: Verify Nameservers Match Exactly
+
+Click your domain, then click **Add Nameservers** to see the required nameserver values Icemail provides.
+
+Then update those nameservers at your domain registrar:
+
+- **GoDaddy**: My Products → Domains → DNS → Nameservers → Change → Enter Custom Nameservers
+- **Namecheap**: Domain List → Manage → Nameservers → Custom DNS → paste values
+- **Cloudflare**: Select domain → Overview → scroll to Nameservers section → update to custom
+
+**Important:** The nameservers must match exactly what Icemail displays — copy-paste to avoid typos.
+
+---
+
+### Step 3: Wait for DNS Propagation
+
+DNS propagation can take **up to 24–48 hours** depending on your registrar and global DNS caches.
+
+To verify propagation status, visit **Whois.com** and look up your domain's current nameserver records.
+
+---
+
+### Step 4: Click Verify in Icemail
+
+Once propagation is confirmed, return to your Icemail dashboard and click **Verify** next to the domain.
+
+---
+
+### ✅ Once Verified
+
+After successful verification:
+
+- Domain status changes to Active
+- SPF, DKIM, DMARC, and MX records are all configured automatically
+- Domain is ready to use for cold outreach campaigns
+
+---
+
+**Need help?** Contact our support team at **team@icemail.ai**.
