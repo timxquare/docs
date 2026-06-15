@@ -61,7 +61,19 @@ export default {
 // Temporary diagnostic — reports which step of the Gmail path fails.
 // Returns no secrets, only status strings. Remove after debugging.
 async function debugCheck(env, doSend) {
-  const result = { steps: {} };
+  const result = { steps: {}, config: {} };
+
+  // Non-secret config echo to verify the right values are wired up.
+  // Client IDs and sender address are not secrets; refresh token/secret
+  // are only reported as present/absent + length, never their values.
+  result.config.clientId = env.GMAIL_CLIENT_ID || "(missing)";
+  result.config.senderAddress = env.GMAIL_SENDER_ADDRESS || "(missing)";
+  result.config.clientSecretPresent = env.GMAIL_CLIENT_SECRET
+    ? `yes (len ${env.GMAIL_CLIENT_SECRET.length})`
+    : "no";
+  result.config.refreshTokenPresent = env.GMAIL_REFRESH_TOKEN
+    ? `yes (len ${env.GMAIL_REFRESH_TOKEN.length})`
+    : "no";
 
   let accessToken;
   try {
