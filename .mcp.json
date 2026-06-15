@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "nitrosend": {
+      "type": "http",
+      "url": "https://api.nitrosend.com/mcp"
+    }
+  }
+}
