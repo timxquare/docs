@@ -1,0 +1,114 @@
+---
+title: "📂How to Connect Existing Domains in Bulk in Icemail"
+description: "📂How to Connect Existing Domains in Bulk in Icemail"
+gleap_id: "685ab95c7f804a6e60a67925"
+gleap_collection: "6849b63fe92e06806c87c22a"
+gleap_collection_slug: "domain-management"
+isDraft: false
+content_hash: "41ab2130"
+---
+
+Managing dozens or even hundreds of cold outreach domains? Icemail makes it fast and scalable with our **bulk domain connection feature**. You can upload multiple domains at once using a CSV file and let Icemail handle the rest — including automated SPF, DKIM, and DMARC setup.
+
+This guide walks you through each step.
+
+---
+
+###  **Step 1: Log into Your Icemail Dashboard**
+
+- Navigate to the **“Domains”** tab on the left-hand menu.
+- Click on the **“Connect Domains”** button at the top right.
+
+---
+
+###  **Step 2: Bulk Upload Domains**
+
+- Click **“Bulk Upload Domains”** to begin.
+- Download the **Sample CSV file** provided to see the required format.
+- Fill in your domain list following the sample structure (e.g., just the domain names in a single column).
+- Upload the completed CSV file to proceed.
+
+Once uploaded, Icemail will start importing and listing the domains automatically.
+
+---
+
+###  **Step 3: Update Nameservers at Your Registrar**
+
+After your domains are added to Icemail, you’ll need to **replace the NS (Nameserver) records** with the ones provided in your dashboard.
+
+>  This step enables **automatic configuration** of your domain's SPF, DKIM, and DMARC records for optimal email deliverability.
+>
+####  Name Server Update Guides:
+
+- [How to Change NS Records in GoDaddy](#)
+- [How to Change NS Records in Hostinger](#)
+- [How to Change NS Records in Namecheap](#)
+
+ DNS propagation can take **up to 24–48 hours**.
+
+---
+
+###  **Step 4: Recheck All Domains**
+
+After updating the NS records in your domain registrar:
+
+- Go back to Icemail.
+- Click the **“Recheck All”** button in the Domains section.
+- Icemail will verify the updates and confirm domain connection status.
+
+---
+
+###  **Important Note for Cloudflare Users**
+
+If your domain was purchased **directly through Cloudflare**, **domain masking is not possible** because Cloudflare doesn’t support external nameserver changes.
+
+To connect the domain to Icemail:
+
+- **Transfer** your domain to a registrar that allows NS updates (e.g., GoDaddy, Namecheap).
+- Then update the name servers and reconnect in Icemail.
+
+---
+
+###  Common Errors & How to Fix Them
+
+####  **1. Workspace Already Exists**
+
+- This means the domain is active under another Icemail workspace.
+- Remove or delete the associated mailboxes before reconnecting.
+
+####  **2. NS Records Not Updated**
+
+- Double-check that you've updated the NS records correctly.
+- Use [whatsmydns.net](https://www.whatsmydns.net/) to confirm global propagation.
+
+####  **3. Domain Already Connected**
+
+- This domain is already connected to your (or another) Icemail account.
+- Check your domain list or contact support to resolve duplicates.
+
+---
+
+###  **Next Step: Add Mailboxes**
+
+Once your domains are successfully connected, you can proceed to:
+
+- Navigate to the **Mailboxes** tab
+- Click **“Add Mailboxes”** > **Buy New Mailboxes** based on your outreach needs
+
+---
+
+###  Related Articles
+
+- [Guide to Connect Existing Domains in Icemail](#)
+- [How to Bulk Edit Domain Details](#)
+- [What is Domain Masking and How to Use It](#)
+- [How to Set Up DMARC Email in Icemail](#)
+
+---
+
+###  Need Help?
+
+If you have questions or need help troubleshooting bulk domain uploads or NS propagation, we're here to help.  
+ Email: [**team@icemail.ai**](mailto:team@icemail.ai)
+
+---

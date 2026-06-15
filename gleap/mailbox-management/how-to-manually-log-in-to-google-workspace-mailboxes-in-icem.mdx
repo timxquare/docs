@@ -1,0 +1,92 @@
+---
+title: "🔐How to Manually Log In to Google Workspace Mailboxes in Icemail"
+description: "🔐How to Manually Log In to Google Workspace Mailboxes in Icemail"
+gleap_id: "685ac7f970a58765cc9512e4"
+gleap_collection: "6849b68247ecc2e7b5a14dfa"
+gleap_collection_slug: "mailbox-management"
+isDraft: false
+content_hash: "ec1f387f"
+---
+
+Logging into your **Google Workspace mailboxes** directly is essential when testing deliverability, verifying setup, or integrating with third-party tools. This guide will walk you through how to securely retrieve your credentials and complete a manual login—using **Icemail + Google Authenticator**.
+
+---
+
+###  Step-by-Step Login Guide
+
+#### **Step 1: Select Mailboxes in Icemail**
+
+- Go to your **Mailboxes Dashboard**.
+- Select one or more Google Workspace mailboxes you want to access manually.
+
+---
+
+#### **Step 2: Export Mailbox Credentials**
+
+- Click the **“Mailbox Actions”** button.
+- Choose **“Export Mailboxes”**, then click **“Export CSV File”**.
+- You’ll receive a secure CSV file sent to your registered Icemail admin email.
+
+---
+
+#### **Step 3: Check Your Email & Download the CSV**
+
+- Open the CSV file. It includes:
+  - **Email addresses**
+  - **Passwords**
+  - **Google Authenticator codes** for 2FA login
+
+>  Keep this file secure—it contains sensitive login credentials.
+>
+---
+
+#### **Step 4: Log Into Gmail.com**
+
+- Visit [https://mail.google.com](https://mail.google.com).
+- Enter the email and password provided in the CSV.
+
+---
+
+#### **Step 5: Use Google Authenticator Code from Icemail**
+
+- When prompted for **2FA**, go back to your Icemail dashboard.
+- Click **“See More”** on the right side of the selected mailbox.
+- You’ll see the **current 6-digit Google Authenticator code**.
+
+> Paste this code into the Google prompt to complete login.
+>
+---
+
+###  Tips for Smooth Login
+
+- **Authenticator code expires every 30 seconds**—if it fails, refresh and try again.
+- Make sure your **browser is not auto-filling old credentials**.
+- If login fails, reset the password via Icemail, export the CSV again, and retry.
+
+---
+
+###  Use Cases for Manual Login
+
+- Confirm mailbox delivery and inbox placement
+- Check spam folder behavior
+- Manually configure third-party tools like Lemlist, Instantly, Woodpecker, etc.
+- Access Gmail settings (e.g., signature, vacation responder, forwarding rules)
+
+---
+
+###  Related Help Articles
+
+- [How to Get SMTP & App Passwords in Icemail](#)
+- [How to Manually Log In to Microsoft Mailboxes](#)
+- [Create & Edit Mailboxes in Bulk](#)
+- [Using Recovery Email in Icemail](#)
+
+---
+
+###  Still Need Help?
+
+If you run into 2FA issues, password errors, or mailbox syncing challenges, our support team is ready to assist.
+
+ Email: [team@icemail.ai](mailto:team@icemail.ai)
+
+---

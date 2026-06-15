@@ -1,0 +1,108 @@
+---
+title: "🧾How to Add DNS Records to Your Domain in Icemail"
+description: "🧾How to Add DNS Records to Your Domain in Icemail"
+gleap_id: "685abbcb8b1edaeb825356f3"
+gleap_collection: "6849b63fe92e06806c87c22a"
+gleap_collection_slug: "domain-management"
+isDraft: false
+content_hash: "689c3050"
+---
+
+DNS (Domain Name System) records are essential for connecting your domain to key services—like cold email, landing pages, verification tools, or CRMs. With **Icemail**, you can quickly and easily manage these records right from your dashboard.
+
+This guide walks you through the steps to manually add DNS records to any domain connected to your Icemail account.
+
+---
+
+###  What Are DNS Records & Why Are They Important?
+
+DNS records map domain names (like `yourdomain.com`) to online services (like email servers or website IPs). They're critical for:
+
+- **Cold email authentication** (SPF, DKIM, DMARC)
+- **Verifying ownership** with third-party platforms (e.g., Google, HubSpot)
+- **Tracking links or redirects**
+- **Setting up subdomains or services**
+
+---
+
+###  How to Add DNS Records in Icemail
+
+#### **Step 1: Open the Domains Dashboard**
+
+Log into your Icemail account and navigate to the **“Domains”** tab.
+
+---
+
+#### **Step 2: Select the Domain**
+
+Click on the domain you wish to update. This opens the right-hand **sidebar**.
+
+---
+
+#### **Step 3: Access Domain Settings**
+
+Click on the **“Domain Settings”** tab within the sidebar.
+
+---
+
+#### **Step 4: Click “Add New Record”**
+
+Scroll to the **DNS Management** section and click the **“Add New Record”** button.
+
+---
+
+#### **Step 5: Enter the DNS Record Details**
+
+You will be prompted to enter:
+
+- **Host Name** – For example: `@`, `mail`, or a subdomain like `track`
+- **Record Type** – Choose from options like `A`, `CNAME`, `TXT`, `MX`, etc.
+- **Address/Value** – Enter the destination or key provided by your third-party service (e.g., verification string, IP, or redirect)
+
+---
+
+#### **Step 6: Save Your Changes**
+
+Click the  **checkmark icon** to save the record. It will be queued for DNS propagation.
+
+ Note: Most changes take effect in **15–30 minutes**, but full global propagation can take up to **24–48 hours**.
+
+---
+
+###  When to Use Manual DNS Configuration
+
+You may need to add DNS records manually when:
+
+- Using a third-party cold email tool or CRM
+- Verifying ownership with Google, Microsoft, etc.
+- Setting up domain masking or custom redirect rules
+- Managing domains not fully delegated to Icemail (i.e., not using Icemail's nameservers)
+
+---
+
+###  Prefer Hands-Free DNS Setup?
+
+If you've pointed your domain’s **NS records to Icemail**, we’ll automatically configure:
+
+- SPF
+- DKIM
+- DMARC  
+… with **no manual entry needed**.
+
+ Learn more: [Automatic DNS Configuration in Icemail](#)
+
+---
+
+###  Related Articles
+
+- [Guide to Connect Existing Domains](#)
+- [How to Set Up DMARC Email in Icemail](#)
+- [How to Use Domain Masking Effectively](#)
+- [Understanding Forwarding, Catch-All, and DMARC Emails](#)
+
+---
+
+###  Need Help?
+
+Our support team is here to help with custom DNS configurations, propagation issues, or third-party platform verification.  
+ Contact us at [**team@icemail.ai**](mailto:team@icemail.ai)

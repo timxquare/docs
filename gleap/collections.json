@@ -1,0 +1,64 @@
+[
+  {
+    "id": "6849b63fe92e06806c87c22a",
+    "slug": "domain-management",
+    "title": {
+      "en": "Domain Management"
+    },
+    "description": {
+      "en": "Learn how to connect or purchase domains, set up DNS records like DMARC and Catch-All, enable domain forwarding, and ensure your domain is optimized for deliverability."
+    },
+    "iconUrl": "https://staticfiles.gleap.io/gfeedback_widgets/vmR4QbaTlcK8zOy0wSIlcIUxZNMcKUdAb1h73B0mqQBDh2QMS21RptGATCffDYOJVWPVptYYCO9.png"
+  },
+  {
+    "id": "6849b68247ecc2e7b5a14dfa",
+    "slug": "mailbox-management",
+    "title": {
+      "en": "Mailbox Management"
+    },
+    "description": {
+      "en": "From creating and editing mailboxes to configuring security settings like 2FA, SMTP, and recovery options—this section covers everything you need to maintain reliable and secure email sending."
+    },
+    "iconUrl": "https://staticfiles.gleap.io/gfeedback_widgets/f2dtwqHpSzNh1os64OJE506ENJkSkAWUSkLONFbH3RSIAyn5fRiEMFRttViRs5vpc00nFWeMYjN.png"
+  },
+  {
+    "id": "6849b6b8e92e06806c8bd279",
+    "slug": "mailbox-export-integrations",
+    "title": {
+      "en": "Mailbox Export & Integrations"
+    },
+    "description": {
+      "en": "Follow step-by-step guides to integrate Icemail with tools like Instantly, Smartlead, and more—so you can start sending campaigns without the hassle."
+    },
+    "iconUrl": "https://staticfiles.gleap.io/gfeedback_widgets/kV3S1EnD3qslb9JsTx6eWnycJ2yooVXBc8VMK3d4IYfqXLi9BMPzyppAMsxWoT3aDR6CfqFCEnC.png"
+  },
+  {
+    "id": "6849b6e7c3746dd2eeaefbdf",
+    "slug": "billing-subscription",
+    "title": {
+      "en": "Billing & Subscription"
+    },
+    "description": {
+      "en": "Learn how to upgrade plans, update payment methods, view invoices, enable auto top-ups, and understand Icemail's refund policy."
+    },
+    "iconUrl": "https://staticfiles.gleap.io/gfeedback_widgets/NB4DTzMq97CTMe02a0QgeMWRVChDa6QwSxHajxKiPzAKait6j8Ds9Eguq9u76JCXt7hBeNpr3aw.png"
+  },
+  {
+    "id": "6849b767ed77fcb13166ed6d",
+    "slug": "faqs",
+    "title": {
+      "en": "FAQs"
+    },
+    "description": {},
+    "iconUrl": "https://staticfiles.gleap.io/gfeedback_widgets/nJQi1JuU9wrYXQ1ogLubRZ3ziuiBP1TDe89iGQaGV81BlGh5cXOqLlWu0YDjCtBOzduwnxw9kqq.png"
+  },
+  {
+    "id": "6849b78ce8b7b64b699df26a",
+    "slug": "unified-inbox",
+    "title": {
+      "en": "Unified Inbox"
+    },
+    "description": {},
+    "iconUrl": "https://staticfiles.gleap.io/gfeedback_widgets/oiQEBNJ8mBFPzMrzXyyqxOSCd1EmahlrA6R7grb1DBWL7LT6MKcOK2vzba19IJSUidlihnpSPrS.png"
+  }
+]

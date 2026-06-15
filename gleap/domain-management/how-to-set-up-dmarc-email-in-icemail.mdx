@@ -1,0 +1,90 @@
+---
+title: "🛡️ How to Set Up DMARC Email in Icemail"
+description: "🛡️ How to Set Up DMARC Email in Icemail"
+gleap_id: "685ab2efe29c330d4c90d3ee"
+gleap_collection: "6849b63fe92e06806c87c22a"
+gleap_collection_slug: "domain-management"
+isDraft: false
+content_hash: "c7f65cf0"
+---
+
+Setting up a DMARC (Domain-based Message Authentication, Reporting & Conformance) email address in **Icemail** allows you to receive critical reports on your domain's email authentication health. These reports help monitor spoofing, phishing, and overall deliverability performance—especially useful when sending high volumes of cold emails.
+
+---
+
+###  **What is DMARC & Why It Matters?**
+
+DMARC is an email security protocol that works alongside SPF and DKIM to ensure that your domain’s emails are authenticated correctly.
+
+By setting up a **DMARC email**, you:
+
+- Gain visibility into who’s sending emails on behalf of your domain
+- Get regular reports from mailbox providers (like Gmail, Yahoo, Microsoft)
+- Prevent domain spoofing and improve inbox placement
+- Maintain a healthy sender reputation
+
+---
+
+###  **Steps to Set Up Your DMARC Email in Icemail**
+
+#### **Step 1: Go to Your Domains Dashboard**
+
+Log into your **Icemail** account and navigate to the **“Domains”** section in the left-hand sidebar.
+
+---
+
+#### **Step 2: Select the Domain**
+
+Click on the domain you want to configure. A sidebar with domain options will appear on the right.
+
+---
+
+#### **Step 3: Access Domain Settings**
+
+Click on the **“Domain Settings”** tab within the sidebar to open your domain configuration options.
+
+---
+
+#### **Step 4: Enter Your DMARC Email**
+
+Find the **DMARC Email** field.  
+Enter an email address that will receive DMARC XML reports from various email service providers. This address should:
+
+- Be monitored regularly
+- Be capable of handling large volumes of data (e.g., `dmarc-reports@yourdomain.com`)
+- Ideally forward to a mailbox dedicated to DMARC logs or integrated with a DMARC monitoring tool
+
+Click **“Save”** once you've entered the email address.
+
+---
+
+###  **Visual Walkthrough**
+
+Coming soon: _How to Set Up Domain Forwarding and DMARC in Icemail_ – A complete video guide.
+
+---
+
+###  **Tips for Managing DMARC Reports**
+
+- **Use a parsing tool** like DMARCian, Postmark, or EasyDMARC to make sense of the raw XML reports.
+- **Set up auto-forwarding or routing rules** if you want the reports reviewed by multiple team members.
+- **Monitor these reports weekly** to catch spoofing attempts and verify domain alignment.
+
+---
+
+###  **Need More Help?**
+
+If you're unsure about which email to use or need assistance setting up DMARC monitoring, reach out to us at:  
+ [**team@icemail.ai**](mailto:team@icemail.ai) — we’re here to help.
+
+---
+
+###  Related Articles
+
+- [How to Set Up Domain Forwarding in Icemail](#)
+- [Understanding DMARC, Email Forwarding, and Catch-All Email](#)
+- [How to Set Up Catch-All Email in Icemail](#)
+- [How to Bulk Edit Domain Details](#)
+- [Getting Started with Your Icemail Account](#)
+
+---

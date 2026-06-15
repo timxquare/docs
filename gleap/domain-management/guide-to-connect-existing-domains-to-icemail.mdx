@@ -1,0 +1,140 @@
+---
+title: "🔗Guide to Connect Existing Domains to Icemail"
+description: "Guide to Connect Existing Domains to Icemail"
+gleap_id: "685ab0266d0344ef28479b90"
+gleap_collection: "6849b63fe92e06806c87c22a"
+gleap_collection_slug: "domain-management"
+isDraft: false
+content_hash: "d35c886e"
+---
+
+## This guide will walk you through how to connect your existing domains to **Icemail**, giving you centralized control over your email outreach infrastructure and ensuring maximum deliverability for your cold email campaigns.
+
+---
+
+###  **Why Connect an Existing Domain to Icemail?**
+
+Connecting your domain to **Icemail** enables:
+
+-  **Seamless email outreach** using your branded or previously purchased domain
+-  **One-click mailbox creation** and warmup automation
+-  **Automatic configuration** of all essential DNS records (SPF, DKIM, DMARC, MX)
+-  **Centralized management** of all domain and mailbox activity within the Icemail dashboard
+
+---
+
+###  **Step-by-Step: Connecting Your Domain to Icemail**
+
+#### 1. **Access the Domain Management Panel**
+
+Log into your Icemail dashboard and go to the **“Domains”** section.
+
+#### 2. **Click “Add Domain” → “Connect Domain”**
+
+This will launch the process to link an external domain you already own.
+
+#### 3. **Enter Your Domain**
+
+Input your existing domain name (e.g., `yourcompanydomain.com`) and click **“Connect Domain.”**
+
+#### 4. **Update Your Nameservers (NS Records)**
+
+You’ll now need to **replace your domain’s current NS (Name Server) records** with the ones provided by Icemail.
+
+> **Important:** Updating NS records allows Icemail to automatically set up and manage your DNS records (SPF, DKIM, DMARC, and MX) for optimal email deliverability.
+>
+#### 5. **How to Change NS Records in Your Domain Registrar**
+
+Here are links to detailed guides depending on where you purchased your domain:
+
+- [GoDaddy: Change NS Records](#)
+- [Namecheap: Change NS Records](#)
+- [Hostinger: Change NS Records](#)
+
+ **Note:** DNS propagation typically takes **24–48 hours**. Your domain may not connect immediately.
+
+#### 6. **Cloudflare Users – Read Carefully**
+
+If your domain was registered **through Cloudflare**, you **cannot connect it directly** to Icemail, as Cloudflare does not allow changing NS records for domains they manage.
+
+To use your domain with Icemail:
+
+1. Transfer your domain to a registrar that supports NS changes (e.g., GoDaddy or Namecheap).
+1. Once transferred, proceed with the connection process in Icemail.
+
+#### 7. **Verify Domain Connection**
+
+After updating the NS records, return to the Icemail dashboard and click **“Recheck.”** Our system will automatically verify that the correct NS records have been applied.
+
+#### 8. **Click “Continue” to Finalize**
+
+Once verification is successful, click **“Continue”** to complete the setup. Your domain is now connected to **Icemail** and ready for mailbox creation.
+
+---
+
+###  **Common Errors & Troubleshooting**
+
+Here are some common messages you might encounter and what they mean:
+
+---
+
+####  **Workspace Already Exists**
+
+This means your domain is currently active in another Icemail workspace or is associated with existing mailboxes elsewhere.  
+**Solution:**
+
+- Contact your registrar and **delete any active mailboxes**.
+- Ensure the domain is not in use in another platform or Icemail workspace.
+- Reach out to [**team@icemail.ai**](mailto:team@icemail.ai) for help in clearing workspace conflicts.
+
+---
+
+####  **NS Records Not Updated**
+
+The system can’t detect the correct NS records.  
+**Solution:**
+
+- Double-check that you've updated the **exact** NS records provided in the Icemail dashboard.
+- Use [https://whatsmydns.net](https://whatsmydns.net) to verify global propagation.
+- Allow up to **48 hours** for changes to fully propagate.
+
+---
+
+####  **Domain Already Connected**
+
+Your domain may already be linked to an existing Icemail account.  
+**Solution:**
+
+- Check your Icemail domain list to avoid duplication.
+- If needed, email [**team@icemail.ai**](mailto:team@icemail.ai) to help investigate ownership.
+
+---
+
+###  **Next Step: Add Mailboxes**
+
+Once your domain is connected, you're ready to create mailboxes:
+
+1. Navigate to the **Mailboxes** section.
+1. Click **“Add Mailboxes” → “Buy New Mailboxes.”**
+1. Choose the quantity of mailboxes you need.
+1. Click **“Proceed to Buy.”**
+
+---
+
+###  Related Help Articles
+
+- [Getting Started with Your Icemail Account](#)
+- [How to Buy a New Domain in Icemail](#)
+- [How to Bulk Edit Domain Details](#)
+- [How to Connect Existing Domains in Bulk](#)
+- [FAQs – Domain & Mailbox Management](#)
+
+---
+
+###  Need Help?
+
+Still have questions? Our support team is always happy to help.  
+ Email: [**team@icemail.ai**](mailto:team@icemail.ai)  
+We’re committed to getting your cold email engine running smoothly—start to finish.
+
+---

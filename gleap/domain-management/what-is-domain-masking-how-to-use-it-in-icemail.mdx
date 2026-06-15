@@ -1,0 +1,126 @@
+---
+title: "🌐What Is Domain Masking & How to Use It in Icemail"
+description: "🌐What Is Domain Masking & How to Use It in Icemail"
+gleap_id: "685ab842856c015cceb18ba2"
+gleap_collection: "6849b63fe92e06806c87c22a"
+gleap_collection_slug: "domain-management"
+isDraft: false
+content_hash: "76f00f37"
+---
+
+**Domain masking** is a powerful feature in **Icemail** that lets you use a **secondary domain to represent your primary domain**, hiding the original while maintaining a secure, professional email presence.
+
+This technique helps boost cold email deliverability, protect your main domain from blacklisting, and ensure your links and email headers look credible and clean.
+
+---
+
+###  **What is Domain Masking?**
+
+**Domain masking** makes it appear as though all activity is coming from a different (secondary) domain—even though you're actually using a primary domain behind the scenes. Instead of simply forwarding users or emails, Icemail uses a **proxy layer with SSL encryption** to mask your domain identity.
+
+> For example, instead of exposing `mainbrand.com`, you can send emails from `campaignhost.co`, keeping the main domain private and protected.
+>
+---
+
+###  **How Domain Masking Works in Icemail**
+
+1. **DNS Setup**  
+You point the **A record** of your secondary domain to a trusted Icemail proxy IP.
+1. **SSL + Proxy Layer**  
+Icemail automatically configures SSL certificates for your secondary domain, establishing a secure connection for email links and headers.
+1. **Header & Link Rewriting**  
+All links and header references in your emails are rewritten to reflect the masked domain—not your primary one.
+1. **IP Management**  
+Icemail manages IP pools (shared or dedicated), preserving domain reputation and improving inbox placement.
+
+---
+
+###  **Benefits of Using Domain Masking in Icemail**
+
+####  **Improved Email Deliverability**
+
+- Masked domains help emails pass security filters (e.g., Mimecast, Barracuda).
+- Reduces chances of being flagged as spoofed or spam.
+
+####  **Primary Domain Protection**
+
+- Keeps your main domain from being blacklisted.
+- Useful when sending at scale across multiple outreach campaigns.
+
+####  **Enhanced Credibility**
+
+- Clean, branded links improve trust and boost reply rates.
+- Appears secure thanks to automatic SSL.
+
+####  **Campaign Scalability**
+
+- Easily manage multiple sender domains without revealing your infrastructure.
+
+---
+
+###  **How to Set Up Domain Masking in Icemail**
+
+#### **Step 1: Open the Domains Dashboard**
+
+Log into your Icemail account and navigate to the **“Domains”** section.
+
+---
+
+#### **Step 2: Choose the Domain**
+
+Click on the domain you'd like to use as your **masked domain**. A sidebar will appear.
+
+---
+
+#### **Step 3: Go to Domain Settings**
+
+In the sidebar, click the **“Domain Settings”** tab.
+
+---
+
+#### **Step 4: Enable Domain Masking**
+
+Under the **“Domain Forwarding”** section:
+
+- Enter your **main website URL** (e.g., `https://yourbrand.com`) — this is where users will be redirected if they click a branded link.
+- Check the box labeled **“Enable Domain Masking.”**
+
+---
+
+#### **Step 5: Save Your Changes**
+
+Click **“Save”** to apply the settings.  
+ Please allow **5–10 minutes** for DNS and SSL propagation. Once completed, domain masking will be active.
+
+---
+
+###  Best Practices
+
+- Use a **clean secondary domain** (new or warmed up) with good reputation.
+- Masking is ideal for **tracking links, CTAs**, and **protecting reply-to domains**.
+- Combine with SPF, DKIM, and DMARC for optimal authentication and security.
+
+---
+
+###  Why Use Icemail for Domain Masking?
+
+**Icemail’s domain masking engine is designed specifically for high-volume cold outreach.** It ensures your sender reputation is protected while maximizing your deliverability and branding. Whether you're managing 5 domains or 500, Icemail’s infrastructure scales with your outbound strategy.
+
+---
+
+###  Related Articles
+
+- [Guide to Connect Existing Domains](#)
+- [How to Set Up Domain Forwarding in Icemail](#)
+- [How to Set Up DMARC Email in Icemail](#)
+- [How to Use Catch-All Email in Icemail](#)
+- [How to Add Mailboxes After Domain Setup](#)
+
+---
+
+###  Need Help?
+
+Questions or need support with your domain setup? Our expert team is just a message away.  
+ Email us at [**team@icemail.ai**](mailto:team@icemail.ai) and we’ll get you sorted in no time.
+
+---
