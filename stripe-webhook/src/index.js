@@ -72,7 +72,7 @@ async function sendFounderEmail(env, toEmail, toName) {
   const accessToken = await getAccessToken(env);
   const firstName = toName.split(" ")[0];
 
-  const subject = "Welcome — glad you're here";
+  const subject = "Welcome - glad you're here";
   const bodyText = [
     `Hi ${firstName},`,
     ``,
