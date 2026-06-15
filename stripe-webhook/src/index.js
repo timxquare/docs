@@ -76,21 +76,22 @@ async function sendFounderEmail(env, toEmail, toName) {
   const bodyText = [
     `Hi ${firstName},`,
     ``,
-    `I'm Tim, founder of [Your Company]. I wanted to reach out personally to welcome you.`,
+    `I'm Tim, founder of Icemail. I wanted to reach out personally to welcome you.`,
     ``,
     `A few things I'd love to know:`,
-    `- What brought you to us?`,
+    `- What brought you to Icemail?`,
     `- What are you hoping to get done?`,
     `- Is there anything that felt confusing or unclear?`,
     ``,
     `I read every reply. If you run into anything, just hit reply here and it comes straight to me.`,
     ``,
-    `Tim`,
-    `Founder, [Your Company]`,
+    `Timothy Vadde`,
+    `Founder @ Icemail`,
+    `icemail.ai`,
   ].join("\n");
 
   const rawMessage = [
-    `From: Tim <${env.GMAIL_SENDER_ADDRESS}>`,
+    `From: Timothy Vadde <${env.GMAIL_SENDER_ADDRESS}>`,
     `To: ${toEmail}`,
     `Subject: ${subject}`,
     `Content-Type: text/plain; charset=utf-8`,
