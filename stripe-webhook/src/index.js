@@ -74,6 +74,14 @@ async function debugCheck(env, doSend) {
   result.config.refreshTokenPresent = env.GMAIL_REFRESH_TOKEN
     ? `yes (len ${env.GMAIL_REFRESH_TOKEN.length})`
     : "no";
+  // One-way hash prefixes — safe to expose, lets us confirm a value
+  // actually changed between updates without revealing it.
+  result.config.clientSecretFingerprint = await fingerprint(
+    env.GMAIL_CLIENT_SECRET
+  );
+  result.config.refreshTokenFingerprint = await fingerprint(
+    env.GMAIL_REFRESH_TOKEN
+  );
 
   let accessToken;
   try {
@@ -107,6 +115,18 @@ async function debugCheck(env, doSend) {
   }
 
   return jsonResponse(result);
+}
+
+async function fingerprint(value) {
+  if (!value) return "(missing)";
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value)
+  );
+  return [...new Uint8Array(digest)]
+    .slice(0, 6)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 function jsonResponse(obj) {
