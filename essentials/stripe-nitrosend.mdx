@@ -1,0 +1,365 @@
+---
+title: "Stripe + Nitrosend"
+description: "Automated onboarding and payment emails for Icemail's pay-as-you-go customers using Nitrosend flows."
+---
+
+## Overview
+
+This integration connects Stripe events to Nitrosend automation flows. Icemail is pay-as-you-go — no subscriptions, no seat minimums — so the email flow reflects that: a founder intro on signup, a creative nudge if no payment lands within 24 hours, and a final follow-up after 7 days.
+
+**Flows in Nitrosend:**
+
+| Flow | Trigger | Steps |
+|------|---------|-------|
+| New Customer Onboarding | `customer_signup` | Founder intro → wait 24h → split on first payment → nudge → wait 7d → follow-up |
+| Payment Succeeded | `stripe_payment_succeeded` | Receipt email + tags contact `first_payment_made` |
+| Payment Failed | `stripe_payment_failed` | Alert email → wait 24h → reminder |
+
+---
+
+## How it works
+
+1. New customer registers in your app → fire `customer_signup` to Nitrosend
+2. Customer makes their first payment → Stripe webhook fires → tag contact `first_payment_made` + send receipt
+3. The onboarding flow checks the tag at 24h — if missing, the nudge sequence fires
+
+---
+
+## Webhook handler
+
+Install dependencies:
+
+```bash
+npm install stripe
+```
+
+Set environment variables:
+
+```bash
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NITROSEND_API_KEY=ns_live_...
+```
+
+<CodeGroup>
+
+```typescript TypeScript (Express)
+import express from "express";
+import Stripe from "stripe";
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const NITROSEND_API = "https://api.nitrosend.com/v1/my";
+const headers = () => ({
+  Authorization: `Bearer ${process.env.NITROSEND_API_KEY}`,
+  "Content-Type": "application/json",
+});
+
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"] as string;
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET!
+      );
+    } catch {
+      return res.status(400).send("Webhook signature verification failed");
+    }
+
+    try {
+      await handleStripeEvent(event);
+      res.json({ received: true });
+    } catch (err) {
+      console.error("Nitrosend event failed:", err);
+      res.status(500).json({ error: "Failed to forward event" });
+    }
+  }
+);
+
+async function handleStripeEvent(event: Stripe.Event) {
+  switch (event.type) {
+    case "customer.created": {
+      // Fire signup event — starts the onboarding flow immediately
+      const customer = event.data.object as Stripe.Customer;
+      await upsertContact({ email: customer.email!, name: customer.name ?? undefined });
+      await fireEvent(customer.email!, "customer_signup", {});
+      break;
+    }
+    case "payment_intent.succeeded": {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      const customer = await resolveCustomer(pi.customer as string);
+      // Tag the contact so the 24h split skips the nudge sequence
+      await tagContact(customer.email, "first_payment_made");
+      await fireEvent(customer.email, "stripe_payment_succeeded", {
+        amount: formatAmount(pi.amount, pi.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: pi.metadata?.invoice_id ?? "",
+      });
+      break;
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const customer = await resolveCustomer(invoice.customer as string);
+      await fireEvent(customer.email, "stripe_payment_failed", {
+        amount: formatAmount(invoice.amount_due, invoice.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: invoice.id,
+        failure_reason: invoice.last_finalization_error?.message ?? "Card declined",
+        card_last4: await getCardLast4(invoice.customer as string),
+      });
+      break;
+    }
+  }
+}
+
+async function upsertContact(customer: { email: string; name?: string }) {
+  const [firstName, ...rest] = (customer.name ?? "").split(" ");
+  await fetch(`${NITROSEND_API}/contacts`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({
+      email: customer.email,
+      first_name: firstName || undefined,
+      last_name: rest.join(" ") || undefined,
+      subscribed_email: true,
+    }),
+  });
+}
+
+async function tagContact(email: string, tag: string) {
+  await fetch(`${NITROSEND_API}/contacts/tag`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ email, tag }),
+  });
+}
+
+async function fireEvent(email: string, eventName: string, data: Record<string, string>) {
+  await fetch(`${NITROSEND_API}/events`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({
+      event: eventName,
+      contact: { email },
+      data,
+    }),
+  });
+}
+
+async function resolveCustomer(customerId: string) {
+  const customer = await stripe.customers.retrieve(customerId);
+  if (customer.deleted) throw new Error("Customer deleted");
+  return { email: customer.email! };
+}
+
+async function getCardLast4(customerId: string): Promise<string> {
+  const methods = await stripe.paymentMethods.list({
+    customer: customerId,
+    type: "card",
+    limit: 1,
+  });
+  return methods.data[0]?.card?.last4 ?? "••••";
+}
+
+function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(amount / 100);
+}
+
+app.listen(3000);
+```
+
+```javascript JavaScript (Express)
+const express = require("express");
+const Stripe = require("stripe");
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const NITROSEND_API = "https://api.nitrosend.com/v1/my";
+const headers = () => ({
+  Authorization: `Bearer ${process.env.NITROSEND_API_KEY}`,
+  "Content-Type": "application/json",
+});
+
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch {
+      return res.status(400).send("Webhook signature verification failed");
+    }
+
+    try {
+      await handleStripeEvent(event);
+      res.json({ received: true });
+    } catch (err) {
+      console.error("Nitrosend event failed:", err);
+      res.status(500).json({ error: "Failed to forward event" });
+    }
+  }
+);
+
+async function handleStripeEvent(event) {
+  switch (event.type) {
+    case "customer.created": {
+      const customer = event.data.object;
+      await upsertContact({ email: customer.email, name: customer.name });
+      await fireEvent(customer.email, "customer_signup", {});
+      break;
+    }
+    case "payment_intent.succeeded": {
+      const pi = event.data.object;
+      const customer = await resolveCustomer(pi.customer);
+      await tagContact(customer.email, "first_payment_made");
+      await fireEvent(customer.email, "stripe_payment_succeeded", {
+        amount: formatAmount(pi.amount, pi.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: pi.metadata?.invoice_id ?? "",
+      });
+      break;
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object;
+      const customer = await resolveCustomer(invoice.customer);
+      await fireEvent(customer.email, "stripe_payment_failed", {
+        amount: formatAmount(invoice.amount_due, invoice.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: invoice.id,
+        failure_reason: invoice.last_finalization_error?.message ?? "Card declined",
+        card_last4: await getCardLast4(invoice.customer),
+      });
+      break;
+    }
+  }
+}
+
+async function upsertContact(customer) {
+  const [firstName, ...rest] = (customer.name ?? "").split(" ");
+  await fetch(`${NITROSEND_API}/contacts`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({
+      email: customer.email,
+      first_name: firstName || undefined,
+      last_name: rest.join(" ") || undefined,
+      subscribed_email: true,
+    }),
+  });
+}
+
+async function tagContact(email, tag) {
+  await fetch(`${NITROSEND_API}/contacts/tag`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ email, tag }),
+  });
+}
+
+async function fireEvent(email, eventName, data) {
+  await fetch(`${NITROSEND_API}/events`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({
+      event: eventName,
+      contact: { email },
+      data,
+    }),
+  });
+}
+
+async function resolveCustomer(customerId) {
+  const customer = await stripe.customers.retrieve(customerId);
+  return { email: customer.email };
+}
+
+async function getCardLast4(customerId) {
+  const methods = await stripe.paymentMethods.list({
+    customer: customerId,
+    type: "card",
+    limit: 1,
+  });
+  return methods.data[0]?.card?.last4 ?? "••••";
+}
+
+function formatAmount(amount, currency) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(amount / 100);
+}
+
+app.listen(3000);
+```
+
+</CodeGroup>
+
+---
+
+## Register the webhook in Stripe
+
+Subscribe to these events:
+
+- `customer.created` — triggers the onboarding flow
+- `payment_intent.succeeded` — tags contact + sends receipt
+- `invoice.payment_failed` — sends payment failed alert
+
+Stripe CLI for local testing:
+
+```bash
+stripe listen \
+  --events customer.created,payment_intent.succeeded,invoice.payment_failed \
+  --forward-to localhost:3000/webhooks/stripe
+```
+
+---
+
+## Onboarding flow logic
+
+```
+customer_signup
+  └── Email 1: Founder note from Tim (immediate)
+  └── Wait 24 hours
+  └── Split: has tag "first_payment_made"?
+        ├── YES → exit (they already paid, no nudge needed)
+        └── NO  → Email 2: "Your mailboxes are just sitting there."
+                  └── Wait 7 days
+                  └── Email 3: "Still here — and so is your infrastructure"
+```
+
+The `first_payment_made` tag is applied by the webhook when `payment_intent.succeeded` fires. If it arrives before the 24h split evaluates, the nudge sequence is skipped entirely.
+
+---
+
+## Merge tags
+
+| Tag | Source |
+|-----|--------|
+| `{{ contact.first_name }}` | Contact first name |
+| `{{ event.amount }}` | Formatted payment amount |
+| `{{ event.date }}` | Event date |
+| `{{ event.invoice_id }}` | Stripe invoice ID |
+| `{{ event.failure_reason }}` | Decline reason (payment failed flow) |
+| `{{ event.card_last4 }}` | Card last 4 digits (payment failed flow) |
+
+---
+
+## Activate flows
+
+Activate from the [Nitrosend dashboard](https://app.nitrosend.com/my/flows) or say "activate the onboarding flow" here.
