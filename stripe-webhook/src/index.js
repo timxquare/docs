@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { SIGNUP_FLOW_SEQUENCE } from "./sequences.js";
+import { MARKETING_SEQUENCE } from "./marketing-sequence.js";
 import { SEED_EMAILS } from "./seed-emails.js";
 
 export default {
@@ -96,22 +97,28 @@ async function handleNewCustomer(env, toEmail, toName) {
     (err) => console.error(`Day 1 email failed for ${toEmail}:`, err.message)
   );
 
-  // Day 2 and Day 5: hand off to Trigger.dev for reliable scheduled delivery
-  const scheduled = SIGNUP_FLOW_SEQUENCE.filter((s) => s.day !== 1);
+  // Signup flow Day 2 + Day 5: Trigger.dev, random weekday time
+  const scheduledSignup = SIGNUP_FLOW_SEQUENCE.filter((s) => s.day !== 1);
   await Promise.all(
-    scheduled.map(({ day }) =>
+    scheduledSignup.map(({ day }) =>
       triggerScheduledEmail(env, toEmail, toName, day).catch((err) =>
-        console.error(`Day ${day} trigger failed for ${toEmail}:`, err.message)
+        console.error(`Signup day ${day} trigger failed for ${toEmail}:`, err.message)
+      )
+    )
+  );
+
+  // Marketing sequence: 9 emails, one per week starting at Day 12
+  await Promise.all(
+    MARKETING_SEQUENCE.map(({ id, day }) =>
+      triggerMarketingEmail(env, toEmail, toName, id, day).catch((err) =>
+        console.error(`Marketing email ${id} trigger failed for ${toEmail}:`, err.message)
       )
     )
   );
 }
 
-// Trigger a Trigger.dev task for scheduled delivery.
-// Trigger.dev calls send-signup-email at the computed weekday 9am ET time.
 async function triggerScheduledEmail(env, toEmail, toName, day) {
-  const runAt = new Date(nextWeekdaySendAt(day) * 1000).toISOString();
-
+  const runAt = nextWeekdaySendAt(day);
   const res = await fetch(
     "https://api.trigger.dev/api/v1/tasks/send-signup-email/trigger",
     {
@@ -126,16 +133,40 @@ async function triggerScheduledEmail(env, toEmail, toName, day) {
       }),
     }
   );
-
   if (!res.ok) {
     throw new Error(`Trigger.dev failed: ${res.status} ${await res.text()}`);
   }
 }
 
-// Returns a Unix timestamp for 9 AM ET on the next weekday >= daysFromNow.
+async function triggerMarketingEmail(env, toEmail, toName, emailId, day) {
+  const runAt = nextWeekdaySendAt(day);
+  const res = await fetch(
+    "https://api.trigger.dev/api/v1/tasks/send-marketing-email/trigger",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.TRIGGER_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        payload: { toEmail, toName, emailId },
+        options: { delay: runAt },
+      }),
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Trigger.dev failed: ${res.status} ${await res.text()}`);
+  }
+}
+
+// Returns an ISO timestamp for a random time between 7am and 9pm ET
+// on the next weekday >= daysFromNow. Handles EST/EDT automatically.
 function nextWeekdaySendAt(daysFromNow) {
   const MS_PER_DAY = 86400 * 1000;
-  const SEND_HOUR_ET = 9;
+
+  // Random send time: hour 7–20 (so latest dispatch starts at 8pm), random minute
+  const sendHourET = Math.floor(Math.random() * 14) + 7; // 7..20
+  const sendMinute = Math.floor(Math.random() * 60);
 
   let d = new Date(Date.now() + daysFromNow * MS_PER_DAY);
 
@@ -167,12 +198,12 @@ function nextWeekdaySendAt(daysFromNow) {
       hour12: false,
     }).format(noonUTC)
   );
-  const utcOffsetHours = 12 - etHourAtNoon;
+  const utcOffsetHours = 12 - etHourAtNoon; // 5 EST, 4 EDT
 
-  const sendUTCHour = SEND_HOUR_ET + utcOffsetHours;
-  return Math.floor(
-    new Date(`${dateStr}T${String(sendUTCHour).padStart(2, "0")}:00:00Z`).getTime() / 1000
-  );
+  const sendUTCHour = sendHourET + utcOffsetHours;
+  return new Date(
+    `${dateStr}T${String(sendUTCHour).padStart(2, "0")}:${String(sendMinute).padStart(2, "0")}:00Z`
+  ).toISOString();
 }
 
 function getFirstName(toName, toEmail) {
