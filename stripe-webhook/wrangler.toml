@@ -1,12 +1,22 @@
-name = "stripe-founder-email"
+# Must match the Cloudflare Workers Builds project name ("docs").
+name = "docs"
 main = "src/index.js"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+# KV namespace for signup deduplication.
+# Create it once with: npx wrangler kv namespace create SIGNUP_LOG
+# Then paste the returned id below.
+[[kv_namespaces]]
+binding = "SIGNUP_LOG"
+id = "db14596b00c841ceb6da9f36ce0e9daa"
+
 # Secrets are NOT set here. Set them with `wrangler secret put <NAME>`:
 #   STRIPE_SECRET_KEY
 #   STRIPE_WEBHOOK_SECRET
-#   GMAIL_CLIENT_ID
-#   GMAIL_CLIENT_SECRET
-#   GMAIL_REFRESH_TOKEN
-#   GMAIL_SENDER_ADDRESS
+#   SENDGRID_API_KEY          (primary sender — also set in Trigger.dev env vars)
+#   TRIGGER_SECRET_KEY        (from trigger.dev dashboard → API Keys)
+#   GMAIL_CLIENT_ID           (fallback sender)
+#   GMAIL_CLIENT_SECRET       (fallback sender)
+#   GMAIL_REFRESH_TOKEN       (fallback sender)
+#   GMAIL_SENDER_ADDRESS      (fallback sender)

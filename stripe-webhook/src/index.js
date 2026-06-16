@@ -1,7 +1,39 @@
 import Stripe from "stripe";
+import { SIGNUP_FLOW_SEQUENCE } from "./sequences.js";
+import { SEED_EMAILS } from "./seed-emails.js";
 
 export default {
   async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // One-time seed endpoint: populates KV with pre-existing Stripe customers.
+    // Visit /seed?token=<SEED_TOKEN> in browser once, then remove this block.
+    if (url.pathname === "/seed") {
+      if (url.searchParams.get("token") !== env.SEED_TOKEN) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      const ts = new Date().toISOString();
+      const existing = await env.SIGNUP_LOG.get("__seeded__");
+      if (existing) {
+        return new Response("Already seeded. Nothing to do.", { status: 200 });
+      }
+      for (let i = 0; i < SEED_EMAILS.length; i += 100) {
+        await Promise.all(
+          SEED_EMAILS.slice(i, i + 100).map((email) =>
+            env.SIGNUP_LOG.put(
+              email,
+              JSON.stringify({ signedUpAt: "pre-existing", importedAt: ts })
+            )
+          )
+        );
+      }
+      await env.SIGNUP_LOG.put("__seeded__", ts);
+      return new Response(
+        `Seeded ${SEED_EMAILS.length} emails into SIGNUP_LOG.`,
+        { status: 200 }
+      );
+    }
+
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
     }
@@ -34,12 +66,7 @@ export default {
       const toName = customer.name || toEmail;
 
       if (toEmail) {
-        // Send in the background so we ACK Stripe immediately
-        ctx.waitUntil(
-          sendFounderEmail(env, toEmail, toName).catch((err) =>
-            console.error(`Failed to email ${toEmail}:`, err.message)
-          )
-        );
+        ctx.waitUntil(handleNewCustomer(env, toEmail, toName));
       }
     }
 
@@ -49,48 +76,144 @@ export default {
   },
 };
 
-async function getAccessToken(env) {
-  const res = await fetch("https://oauth2.googleapis.com/token", {
+async function handleNewCustomer(env, toEmail, toName) {
+  const existing = await env.SIGNUP_LOG.get(toEmail);
+  if (existing) {
+    console.log(`Signup flow already sent to ${toEmail}, skipping.`);
+    return;
+  }
+
+  await env.SIGNUP_LOG.put(
+    toEmail,
+    JSON.stringify({ name: toName, email: toEmail, signedUpAt: new Date().toISOString() })
+  );
+
+  const firstName = getFirstName(toName, toEmail);
+
+  // Day 1: send immediately via SendGrid (with Gmail fallback)
+  const day1 = SIGNUP_FLOW_SEQUENCE.find((s) => s.day === 1);
+  await sendDay1(env, toEmail, toName, day1.subject, day1.getBody(firstName)).catch(
+    (err) => console.error(`Day 1 email failed for ${toEmail}:`, err.message)
+  );
+
+  // Day 2 and Day 5: hand off to Trigger.dev for reliable scheduled delivery
+  const scheduled = SIGNUP_FLOW_SEQUENCE.filter((s) => s.day !== 1);
+  await Promise.all(
+    scheduled.map(({ day }) =>
+      triggerScheduledEmail(env, toEmail, toName, day).catch((err) =>
+        console.error(`Day ${day} trigger failed for ${toEmail}:`, err.message)
+      )
+    )
+  );
+}
+
+// Trigger a Trigger.dev task for scheduled delivery.
+// Trigger.dev calls send-signup-email at the computed weekday 9am ET time.
+async function triggerScheduledEmail(env, toEmail, toName, day) {
+  const runAt = new Date(nextWeekdaySendAt(day) * 1000).toISOString();
+
+  const res = await fetch(
+    "https://api.trigger.dev/api/v1/tasks/send-signup-email/trigger",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.TRIGGER_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        payload: { toEmail, toName, day },
+        options: { delay: runAt },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Trigger.dev failed: ${res.status} ${await res.text()}`);
+  }
+}
+
+// Returns a Unix timestamp for 9 AM ET on the next weekday >= daysFromNow.
+function nextWeekdaySendAt(daysFromNow) {
+  const MS_PER_DAY = 86400 * 1000;
+  const SEND_HOUR_ET = 9;
+
+  let d = new Date(Date.now() + daysFromNow * MS_PER_DAY);
+
+  while (true) {
+    const dow = d.toLocaleDateString("en-US", {
+      timeZone: "America/New_York",
+      weekday: "short",
+    });
+    if (dow !== "Sat" && dow !== "Sun") break;
+    d = new Date(d.getTime() + MS_PER_DAY);
+  }
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(d);
+  const year = parts.find((p) => p.type === "year").value;
+  const month = parts.find((p) => p.type === "month").value;
+  const day = parts.find((p) => p.type === "day").value;
+  const dateStr = `${year}-${month}-${day}`;
+
+  const noonUTC = new Date(`${dateStr}T12:00:00Z`);
+  const etHourAtNoon = parseInt(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "2-digit",
+      hour12: false,
+    }).format(noonUTC)
+  );
+  const utcOffsetHours = 12 - etHourAtNoon;
+
+  const sendUTCHour = SEND_HOUR_ET + utcOffsetHours;
+  return Math.floor(
+    new Date(`${dateStr}T${String(sendUTCHour).padStart(2, "0")}:00:00Z`).getTime() / 1000
+  );
+}
+
+function getFirstName(toName, toEmail) {
+  return toName && toName !== toEmail ? toName.split(" ")[0] : "there";
+}
+
+async function sendDay1(env, toEmail, toName, subject, bodyText) {
+  try {
+    await sendViaSendGrid(env, toEmail, toName, subject, bodyText);
+  } catch (sgErr) {
+    console.error("SendGrid failed, falling back to Gmail:", sgErr.message);
+    await sendViaGmail(env, toEmail, toName, subject, bodyText);
+  }
+}
+
+async function sendViaSendGrid(env, toEmail, toName, subject, bodyText) {
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: env.GMAIL_CLIENT_ID,
-      client_secret: env.GMAIL_CLIENT_SECRET,
-      refresh_token: env.GMAIL_REFRESH_TOKEN,
-      grant_type: "refresh_token",
+    headers: {
+      Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: toEmail, name: toName }] }],
+      from: { email: "tim@icemail.ai", name: "Tim from Icemail" },
+      reply_to: { email: "tim@icemail.ai", name: "Tim from Icemail" },
+      subject,
+      content: [{ type: "text/plain", value: bodyText }],
     }),
   });
 
   if (!res.ok) {
-    throw new Error(`Token refresh failed: ${res.status} ${await res.text()}`);
+    throw new Error(`SendGrid send failed: ${res.status} ${await res.text()}`);
   }
-  const data = await res.json();
-  return data.access_token;
 }
 
-async function sendFounderEmail(env, toEmail, toName) {
+async function sendViaGmail(env, toEmail, toName, subject, bodyText) {
   const accessToken = await getAccessToken(env);
-  const firstName = toName.split(" ")[0];
-
-  const subject = "Welcome — glad you're here";
-  const bodyText = [
-    `Hi ${firstName},`,
-    ``,
-    `I'm Tim, founder of [Your Company]. I wanted to reach out personally to welcome you.`,
-    ``,
-    `A few things I'd love to know:`,
-    `- What brought you to us?`,
-    `- What are you hoping to get done?`,
-    `- Is there anything that felt confusing or unclear?`,
-    ``,
-    `I read every reply. If you run into anything, just hit reply here and it comes straight to me.`,
-    ``,
-    `Tim`,
-    `Founder, [Your Company]`,
-  ].join("\n");
 
   const rawMessage = [
-    `From: Tim <${env.GMAIL_SENDER_ADDRESS}>`,
+    `From: Tim from Icemail <${env.GMAIL_SENDER_ADDRESS}>`,
     `To: ${toEmail}`,
     `Subject: ${subject}`,
     `Content-Type: text/plain; charset=utf-8`,
@@ -113,6 +236,25 @@ async function sendFounderEmail(env, toEmail, toName) {
   if (!res.ok) {
     throw new Error(`Gmail send failed: ${res.status} ${await res.text()}`);
   }
+}
+
+async function getAccessToken(env) {
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: env.GMAIL_CLIENT_ID,
+      client_secret: env.GMAIL_CLIENT_SECRET,
+      refresh_token: env.GMAIL_REFRESH_TOKEN,
+      grant_type: "refresh_token",
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Token refresh failed: ${res.status} ${await res.text()}`);
+  }
+  const data = await res.json();
+  return data.access_token;
 }
 
 // Base64url-encode a UTF-8 string (Gmail API expects RFC 4648 base64url)

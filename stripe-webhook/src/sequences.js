@@ -1,0 +1,97 @@
+// Signup Flow Sequence
+// Three-touch onboarding sequence triggered on customer.created.
+//
+// Day 1 — fires immediately
+// Day 2 — next weekday ≥ 2 days after signup, 9 AM ET
+// Day 5 — next weekday ≥ 5 days after signup, 9 AM ET
+
+export const SIGNUP_FLOW_SEQUENCE = [
+  {
+    day: 1,
+    subject: "you're in",
+    getBody: (firstName) =>
+      [
+        `Hey ${firstName},`,
+        ``,
+        `Timothy here, founder of icemail. Thanks for signing up.`,
+        ``,
+        `You now have access to Google Workspace and Microsoft 365 mailboxes with DKIM, SPF, and DMARC already configured. No DNS work on your end.`,
+        ``,
+        `Three steps to get your first batch sending:`,
+        ``,
+        `1. Add a domain (or a few) in the dashboard`,
+        `2. Pick how many mailboxes per domain. 2 or 3 is a good starting point.`,
+        `3. Hit provision. The rest runs in the background.`,
+        ``,
+        `When they're ready, plug them straight into Instantly, Smartlead, or lemlist from the integrations tab.`,
+        ``,
+        `If anything looks off, reply to this email. It comes to me directly.`,
+        ``,
+        `Timothy`,
+        `Founder, icemail(.)ai`,
+        ``,
+        `P.S. This was sent through a third-party tool, not icemail itself. So don't judge us if it landed somewhere other than Primary. Deliverability is humbling, even for the people who do it for a living.`,
+      ].join("\n"),
+  },
+  {
+    day: 2,
+    subject: "a note before you start sending",
+    getBody: (firstName) =>
+      [
+        `Hey ${firstName},`,
+        ``,
+        `Wanted to flag one thing before you start sending.`,
+        ``,
+        `The biggest reason cold email infrastructure fails has nothing to do with DKIM, SPF, or your warmup tool. It's volume ramp.`,
+        ``,
+        `Most people provision 50 mailboxes on Monday and start sending 30 emails per mailbox on Tuesday. Google and Microsoft notice within days, and the domains get burned before they ever had a chance.`,
+        ``,
+        `What actually works:`,
+        ``,
+        `• Week 1: warmup only, no real sends`,
+        `• Week 2: 5 to 10 real emails per mailbox per day`,
+        `• Week 3 onward: add about 5 per day until you hit 30 to 40`,
+        ``,
+        `If you're using Instantly or Smartlead, set the daily limit inside the campaign, not just inside the warmup tool. The campaign cap is what actually throttles your sends.`,
+        ``,
+        `One more thing: keep your sending domain separate from your main brand domain. Use a lookalike like trygetdomain.com instead of getdomain.com. You can buy and configure them right inside the icemail dashboard.`,
+        ``,
+        `Running an agency, or want to skip the ramp entirely? We also do whitelabel setups, pre-warmed mailboxes, and flexible APIs. Reply and I'll send specifics.`,
+        ``,
+        `Happy to glance at your setup before you start sending. Just reply.`,
+        ``,
+        `Timothy`,
+        ``,
+        `P.S. Yes, the irony isn't lost on us. A deliverability email sent through a third-party tool that may or may not have landed in Primary. If this is sitting in Promotions, drag it over and we'll consider it a personal favor.`,
+      ].join("\n"),
+  },
+  {
+    day: 5,
+    subject: "what are you trying to do with icemail?",
+    getBody: (firstName) =>
+      [
+        `Hey ${firstName},`,
+        ``,
+        `Timothy again. Last email from me in this welcome flow, promise.`,
+        ``,
+        `Wanted to ask: what made you sign up for icemail? Running an agency, doing outbound for your own startup, something else?`,
+        ``,
+        `Reason I'm asking is a bit selfish. The more I know about how people actually use the platform, the better I can prioritize what to build. Microsoft DKIM automation, bulk provisioning, and pay-as-you-go pricing all shipped this year based on replies to emails like this one.`,
+        ``,
+        `If you've got 30 seconds, reply and tell me:`,
+        ``,
+        `1. What you're sending (agency outbound, SaaS founder-led, recruiting, or other)`,
+        `2. Roughly how many mailboxes you're planning to run`,
+        `3. One thing that would make icemail obviously better for you`,
+        ``,
+        `In return, if you're stuck on anything (setup, integrations, domain strategy), send me a screenshot and I'll take a look personally.`,
+        ``,
+        `Thanks for trying us out.`,
+        ``,
+        `Timothy`,
+        `Founder, icemail.ai`,
+        ``,
+        `P.S. Honest moment. This sequence was sent through a third-party tool, not our own infrastructure.`,
+      ].join("\n"),
+  },
+];
