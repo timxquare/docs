@@ -88,6 +88,37 @@ export default {
       return new Response(`Sent "${email.subject}" (${emailId}) to ${toEmail}`, { status: 200 });
     }
 
+    // Test endpoint: verify Trigger.dev connection by firing send-signup-email immediately.
+    // Usage: /test-trigger?token=<SEED_TOKEN>&to=email@example.com&name=First+Last
+    if (url.pathname === "/test-trigger") {
+      if (url.searchParams.get("token") !== env.SEED_TOKEN) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      const toEmail = url.searchParams.get("to");
+      if (!toEmail) return new Response("Missing ?to= param", { status: 400 });
+      const toName = url.searchParams.get("name") || toEmail;
+
+      const trigRes = await fetch(
+        "https://api.trigger.dev/api/v1/tasks/send-signup-email/trigger",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${env.TRIGGER_SECRET_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            payload: { toEmail, toName, day: 2 },
+            // No delay — runs immediately so you can verify in Trigger.dev dashboard
+          }),
+        }
+      );
+      const trigBody = await trigRes.text();
+      if (!trigRes.ok) {
+        return new Response(`Trigger.dev error ${trigRes.status}: ${trigBody}`, { status: 500 });
+      }
+      return new Response(`Trigger.dev OK: ${trigBody}`, { status: 200 });
+    }
+
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
     const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
