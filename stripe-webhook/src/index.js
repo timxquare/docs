@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { SIGNUP_FLOW_SEQUENCE } from "./sequences.js";
 
 export default {
   async fetch(request, env, ctx) {
@@ -34,19 +35,7 @@ export default {
       const toName = customer.name || toEmail;
 
       if (toEmail) {
-        ctx.waitUntil(
-          Promise.all([
-            sendDay1Email(env, toEmail, toName).catch((err) =>
-              console.error(`Day 1 email failed for ${toEmail}:`, err.message)
-            ),
-            sendDay2Email(env, toEmail, toName).catch((err) =>
-              console.error(`Day 2 email failed for ${toEmail}:`, err.message)
-            ),
-            sendDay5Email(env, toEmail, toName).catch((err) =>
-              console.error(`Day 5 email failed for ${toEmail}:`, err.message)
-            ),
-          ])
-        );
+        ctx.waitUntil(handleNewCustomer(env, toEmail, toName));
       }
     }
 
@@ -56,15 +45,42 @@ export default {
   },
 };
 
-// Returns a Unix timestamp for 9am ET on the next weekday that is at least
-// `daysFromNow` calendar days in the future, respecting DST automatically.
+async function handleNewCustomer(env, toEmail, toName) {
+  // Deduplicate: skip if this email has already been through the signup flow
+  const existing = await env.SIGNUP_LOG.get(toEmail);
+  if (existing) {
+    console.log(`Signup flow already sent to ${toEmail}, skipping.`);
+    return;
+  }
+
+  // Log before sending so a retry can't double-send
+  await env.SIGNUP_LOG.put(
+    toEmail,
+    JSON.stringify({ signedUpAt: new Date().toISOString() })
+  );
+
+  const firstName = getFirstName(toName, toEmail);
+
+  await Promise.all(
+    SIGNUP_FLOW_SEQUENCE.map(({ day, subject, getBody }) => {
+      const bodyText = getBody(firstName);
+      const sendAt = day === 1 ? null : nextWeekdaySendAt(day);
+      return sendEmail(env, toEmail, toName, subject, bodyText, sendAt).catch(
+        (err) =>
+          console.error(`Day ${day} email failed for ${toEmail}:`, err.message)
+      );
+    })
+  );
+}
+
+// Returns a Unix timestamp for 9 AM ET on the next weekday >= daysFromNow.
+// Handles EST/EDT automatically via Intl.
 function nextWeekdaySendAt(daysFromNow) {
   const MS_PER_DAY = 86400 * 1000;
-  const SEND_HOUR_ET = 9; // 9 AM ET
+  const SEND_HOUR_ET = 9;
 
   let d = new Date(Date.now() + daysFromNow * MS_PER_DAY);
 
-  // Advance past weekends
   while (true) {
     const dow = d.toLocaleDateString("en-US", {
       timeZone: "America/New_York",
@@ -74,7 +90,6 @@ function nextWeekdaySendAt(daysFromNow) {
     d = new Date(d.getTime() + MS_PER_DAY);
   }
 
-  // Get YYYY-MM-DD in ET
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/New_York",
     year: "numeric",
@@ -86,7 +101,6 @@ function nextWeekdaySendAt(daysFromNow) {
   const day = parts.find((p) => p.type === "day").value;
   const dateStr = `${year}-${month}-${day}`;
 
-  // Determine the UTC offset for ET on this date (handles EST/EDT automatically)
   const noonUTC = new Date(`${dateStr}T12:00:00Z`);
   const etHourAtNoon = parseInt(
     new Intl.DateTimeFormat("en-US", {
@@ -99,7 +113,9 @@ function nextWeekdaySendAt(daysFromNow) {
 
   const sendUTCHour = SEND_HOUR_ET + utcOffsetHours;
   return Math.floor(
-    new Date(`${dateStr}T${String(sendUTCHour).padStart(2, "0")}:00:00Z`).getTime() / 1000
+    new Date(
+      `${dateStr}T${String(sendUTCHour).padStart(2, "0")}:00:00Z`
+    ).getTime() / 1000
   );
 }
 
@@ -107,106 +123,15 @@ function getFirstName(toName, toEmail) {
   return toName && toName !== toEmail ? toName.split(" ")[0] : "there";
 }
 
-async function sendDay1Email(env, toEmail, toName) {
-  const firstName = getFirstName(toName, toEmail);
-
-  const subject = "you're in";
-  const bodyText = [
-    `Hey ${firstName},`,
-    ``,
-    `Timothy here, founder of icemail. Thanks for signing up.`,
-    ``,
-    `You now have access to Google Workspace and Microsoft 365 mailboxes with DKIM, SPF, and DMARC already configured. No DNS work on your end.`,
-    ``,
-    `Three steps to get your first batch sending:`,
-    ``,
-    `1. Add a domain (or a few) in the dashboard`,
-    `2. Pick how many mailboxes per domain. 2 or 3 is a good starting point.`,
-    `3. Hit provision. The rest runs in the background.`,
-    ``,
-    `When they're ready, plug them straight into Instantly, Smartlead, or lemlist from the integrations tab.`,
-    ``,
-    `If anything looks off, reply to this email. It comes to me directly.`,
-    ``,
-    `Timothy`,
-    `Founder, icemail(.)ai`,
-    ``,
-    `P.S. This was sent through a third-party tool, not icemail itself. So don't judge us if it landed somewhere other than Primary. Deliverability is humbling, even for the people who do it for a living.`,
-  ].join("\n");
-
+async function sendEmail(env, toEmail, toName, subject, bodyText, sendAt) {
   try {
-    await sendViaSendGrid(env, toEmail, toName, subject, bodyText);
+    await sendViaSendGrid(env, toEmail, toName, subject, bodyText, sendAt);
   } catch (sgErr) {
+    // Gmail fallback only for immediate sends — it can't schedule
+    if (sendAt) throw sgErr;
     console.error("SendGrid failed, falling back to Gmail:", sgErr.message);
     await sendViaGmail(env, toEmail, toName, subject, bodyText);
   }
-}
-
-async function sendDay2Email(env, toEmail, toName) {
-  const firstName = getFirstName(toName, toEmail);
-
-  const subject = "a note before you start sending";
-  const bodyText = [
-    `Hey ${firstName},`,
-    ``,
-    `Wanted to flag one thing before you start sending.`,
-    ``,
-    `The biggest reason cold email infrastructure fails has nothing to do with DKIM, SPF, or your warmup tool. It's volume ramp.`,
-    ``,
-    `Most people provision 50 mailboxes on Monday and start sending 30 emails per mailbox on Tuesday. Google and Microsoft notice within days, and the domains get burned before they ever had a chance.`,
-    ``,
-    `What actually works:`,
-    ``,
-    `• Week 1: warmup only, no real sends`,
-    `• Week 2: 5 to 10 real emails per mailbox per day`,
-    `• Week 3 onward: add about 5 per day until you hit 30 to 40`,
-    ``,
-    `If you're using Instantly or Smartlead, set the daily limit inside the campaign, not just inside the warmup tool. The campaign cap is what actually throttles your sends.`,
-    ``,
-    `One more thing: keep your sending domain separate from your main brand domain. Use a lookalike like trygetdomain.com instead of getdomain.com. You can buy and configure them right inside the icemail dashboard.`,
-    ``,
-    `Running an agency, or want to skip the ramp entirely? We also do whitelabel setups, pre-warmed mailboxes, and flexible APIs. Reply and I'll send specifics.`,
-    ``,
-    `Happy to glance at your setup before you start sending. Just reply.`,
-    ``,
-    `Timothy`,
-    ``,
-    `P.S. Yes, the irony isn't lost on us. A deliverability email sent through a third-party tool that may or may not have landed in Primary. If this is sitting in Promotions, drag it over and we'll consider it a personal favor.`,
-  ].join("\n");
-
-  await sendViaSendGrid(env, toEmail, toName, subject, bodyText, nextWeekdaySendAt(2));
-}
-
-async function sendDay5Email(env, toEmail, toName) {
-  const firstName = getFirstName(toName, toEmail);
-
-  const subject = "what are you trying to do with icemail?";
-  const bodyText = [
-    `Hey ${firstName},`,
-    ``,
-    `Timothy again. Last email from me in this welcome flow, promise.`,
-    ``,
-    `Wanted to ask: what made you sign up for icemail? Running an agency, doing outbound for your own startup, something else?`,
-    ``,
-    `Reason I'm asking is a bit selfish. The more I know about how people actually use the platform, the better I can prioritize what to build. Microsoft DKIM automation, bulk provisioning, and pay-as-you-go pricing all shipped this year based on replies to emails like this one.`,
-    ``,
-    `If you've got 30 seconds, reply and tell me:`,
-    ``,
-    `1. What you're sending (agency outbound, SaaS founder-led, recruiting, or other)`,
-    `2. Roughly how many mailboxes you're planning to run`,
-    `3. One thing that would make icemail obviously better for you`,
-    ``,
-    `In return, if you're stuck on anything (setup, integrations, domain strategy), send me a screenshot and I'll take a look personally.`,
-    ``,
-    `Thanks for trying us out.`,
-    ``,
-    `Timothy`,
-    `Founder, icemail.ai`,
-    ``,
-    `P.S. Honest moment. This sequence was sent through a third-party tool, not our own infrastructure.`,
-  ].join("\n");
-
-  await sendViaSendGrid(env, toEmail, toName, subject, bodyText, nextWeekdaySendAt(5));
 }
 
 async function sendViaSendGrid(env, toEmail, toName, subject, bodyText, sendAt) {
