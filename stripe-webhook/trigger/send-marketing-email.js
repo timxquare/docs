@@ -12,7 +12,7 @@ export const sendMarketingEmail = task({
 
     const firstName =
       toName && toName !== toEmail ? toName.split(" ")[0] : "there";
-    const html = email.html.replace(/\{\{firstName\}\}/g, firstName);
+    const bodyText = email.text.replace(/\{\{firstName\}\}/g, firstName);
 
     const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
       method: "POST",
@@ -22,10 +22,10 @@ export const sendMarketingEmail = task({
       },
       body: JSON.stringify({
         personalizations: [{ to: [{ email: toEmail, name: toName }] }],
-        from: { email: "tim@crew.icemail.ai", name: "Icemail Crew" },
+        from: { email: "tim@icemail.ai", name: "Timothy" },
         reply_to: { email: "tim@icemail.ai", name: "Timothy" },
         subject: email.subject,
-        content: [{ type: "text/html", value: html }],
+        content: [{ type: "text/plain", value: bodyText }],
       }),
     });
 

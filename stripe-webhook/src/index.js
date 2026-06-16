@@ -64,7 +64,7 @@ export default {
       if (!email) return new Response(`Unknown emailId: ${emailId}`, { status: 400 });
 
       const firstName = toName && toName !== toEmail ? toName.split(" ")[0] : "there";
-      const html = email.html.replace(/\{\{firstName\}\}/g, firstName);
+      const bodyText = email.text.replace(/\{\{firstName\}\}/g, firstName);
 
       const sgRes = await fetch("https://api.sendgrid.com/v3/mail/send", {
         method: "POST",
@@ -74,10 +74,10 @@ export default {
         },
         body: JSON.stringify({
           personalizations: [{ to: [{ email: toEmail, name: toName }] }],
-          from: { email: "tim@crew.icemail.ai", name: "Icemail Crew" },
+          from: { email: "tim@icemail.ai", name: "Timothy" },
           reply_to: { email: "tim@icemail.ai", name: "Timothy" },
           subject: email.subject,
-          content: [{ type: "text/html", value: html }],
+          content: [{ type: "text/plain", value: bodyText }],
         }),
       });
 
