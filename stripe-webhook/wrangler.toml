@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 # Then paste the returned id below.
 [[kv_namespaces]]
 binding = "SIGNUP_LOG"
-id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+id = "2dfb5afe90534aa488e27f95466589d7"
 
 # Secrets are NOT set here. Set them with `wrangler secret put <NAME>`:
 #   STRIPE_SECRET_KEY
