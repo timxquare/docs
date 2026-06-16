@@ -1,36 +1,23 @@
 import { task } from "@trigger.dev/sdk/v3";
-import { SIGNUP_FLOW_SEQUENCE } from "../src/sequences.js";
 
+// Trigger.dev is only the scheduler — actual sending is handled by the Cloudflare Worker.
 export const sendSignupEmail = task({
   id: "send-signup-email",
   maxDuration: 60,
   run: async (payload) => {
-    const { toEmail, toName, day } = payload;
+    const { toEmail, toName, day, workerUrl } = payload;
 
-    const sequence = SIGNUP_FLOW_SEQUENCE.find((s) => s.day === day);
-    if (!sequence) throw new Error(`No sequence found for day ${day}`);
-
-    const firstName =
-      toName && toName !== toEmail ? toName.split(" ")[0] : "there";
-    const bodyText = sequence.getBody(firstName);
-
-    const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    const res = await fetch(`${workerUrl}/send-email`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+        Authorization: `Bearer ${process.env.SEED_TOKEN}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        personalizations: [{ to: [{ email: toEmail, name: toName }] }],
-        from: { email: "tim@icemail.ai", name: "Tim from Icemail" },
-        reply_to: { email: "tim@icemail.ai", name: "Tim from Icemail" },
-        subject: sequence.subject,
-        content: [{ type: "text/plain", value: bodyText }],
-      }),
+      body: JSON.stringify({ type: "signup", toEmail, toName, day }),
     });
 
     if (!res.ok) {
-      throw new Error(`SendGrid failed: ${res.status} ${await res.text()}`);
+      throw new Error(`Worker /send-email failed: ${res.status} ${await res.text()}`);
     }
 
     return { sent: true, email: toEmail, day };

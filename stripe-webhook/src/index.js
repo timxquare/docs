@@ -135,6 +135,52 @@ export default {
       return new Response(`Trigger.dev OK: ${trigBody}`, { status: 200 });
     }
 
+    // Internal endpoint called by Trigger.dev tasks when a scheduled send fires.
+    // Trigger.dev is only the scheduler — all email logic runs here in Cloudflare.
+    // Auth: Bearer token in Authorization header must match env.SEED_TOKEN.
+    if (url.pathname === "/send-email" && request.method === "POST") {
+      const auth = request.headers.get("Authorization");
+      if (auth !== `Bearer ${env.SEED_TOKEN}`) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      const { type, toEmail, toName, day, emailId } = await request.json();
+      const firstName = getFirstName(toName, toEmail);
+
+      if (type === "signup") {
+        const sequence = SIGNUP_FLOW_SEQUENCE.find((s) => s.day === day);
+        if (!sequence) return new Response(`No sequence for day ${day}`, { status: 400 });
+        await sendViaSendGrid(env, toEmail, toName, sequence.subject, sequence.getBody(firstName));
+        return new Response(JSON.stringify({ sent: true }), { headers: { "Content-Type": "application/json" } });
+      }
+
+      if (type === "marketing") {
+        const email = MARKETING_SEQUENCE.find((e) => e.id === emailId);
+        if (!email) return new Response(`Unknown emailId: ${emailId}`, { status: 400 });
+        const logoUrl = `${new URL(request.url).origin}/logo.svg`;
+        const html = email.html
+          .replace(/\{\{firstName\}\}/g, firstName)
+          .replace(/\{\{logoUrl\}\}/g, logoUrl);
+        const sgRes = await fetch("https://api.sendgrid.com/v3/mail/send", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            personalizations: [{ to: [{ email: toEmail, name: toName }] }],
+            from: { email: "tim@icemail.ai", name: "Timothy" },
+            reply_to: { email: "tim@icemail.ai", name: "Timothy" },
+            subject: email.subject,
+            content: [{ type: "text/html", value: html }],
+          }),
+        });
+        if (!sgRes.ok) throw new Error(`SendGrid failed: ${sgRes.status} ${await sgRes.text()}`);
+        return new Response(JSON.stringify({ sent: true }), { headers: { "Content-Type": "application/json" } });
+      }
+
+      return new Response("Unknown type", { status: 400 });
+    }
+
     const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
     const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
@@ -285,6 +331,7 @@ async function handleNewCustomer(env, toEmail, toName) {
 }
 
 // daysFromNow defaults to day — pass a smaller value for backfill
+// Trigger.dev is only the scheduler; actual sending happens via /send-email on this Worker.
 async function triggerScheduledEmail(env, toEmail, toName, day, daysFromNow = day) {
   const runAt = nextWeekdaySendAt(daysFromNow);
   const res = await fetch(
@@ -296,7 +343,7 @@ async function triggerScheduledEmail(env, toEmail, toName, day, daysFromNow = da
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        payload: { toEmail, toName, day },
+        payload: { toEmail, toName, day, workerUrl: env.WORKER_URL },
         options: { delay: runAt },
       }),
     }
@@ -318,7 +365,7 @@ async function triggerMarketingEmail(env, toEmail, toName, emailId, day, daysFro
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        payload: { toEmail, toName, emailId },
+        payload: { toEmail, toName, emailId, workerUrl: env.WORKER_URL },
         options: { delay: runAt },
       }),
     }
