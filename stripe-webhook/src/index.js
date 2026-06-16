@@ -88,6 +88,7 @@ export default {
       return new Response(`Sent "${email.subject}" (${emailId}) to ${toEmail}`, { status: 200 });
     }
 
+    const stripe = new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
     const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
     const sig = request.headers.get("stripe-signature");
