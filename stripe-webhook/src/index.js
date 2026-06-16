@@ -89,8 +89,8 @@ async function sendFounderEmail(env, toEmail, toName) {
 async function sendViaSendGrid(env, toEmail, toName, subject, bodyText) {
   const payload = {
     personalizations: [{ to: [{ email: toEmail, name: toName }] }],
-    from: { email: "tim@icemail.ai", name: "Timothy Vadde" },
-    reply_to: { email: "tim@icemail.ai", name: "Timothy Vadde" },
+    from: { email: "tim@icemail.ai", name: "Tim from Icemail" },
+    reply_to: { email: "tim@icemail.ai", name: "Tim from Icemail" },
     subject,
     content: [{ type: "text/plain", value: bodyText }],
   };
@@ -113,7 +113,7 @@ async function sendViaGmail(env, toEmail, toName, subject, bodyText) {
   const accessToken = await getAccessToken(env);
 
   const rawMessage = [
-    `From: Timothy Vadde <${env.GMAIL_SENDER_ADDRESS}>`,
+    `From: Tim from Icemail <${env.GMAIL_SENDER_ADDRESS}>`,
     `To: ${toEmail}`,
     `Subject: ${subject}`,
     `Content-Type: text/plain; charset=utf-8`,
