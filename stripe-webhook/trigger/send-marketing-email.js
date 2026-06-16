@@ -12,7 +12,10 @@ export const sendMarketingEmail = task({
 
     const firstName =
       toName && toName !== toEmail ? toName.split(" ")[0] : "there";
-    const bodyText = email.text.replace(/\{\{firstName\}\}/g, firstName);
+    const logoUrl = process.env.LOGO_URL || "";
+    const html = email.html
+      .replace(/\{\{firstName\}\}/g, firstName)
+      .replace(/\{\{logoUrl\}\}/g, logoUrl);
 
     const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
       method: "POST",
@@ -25,7 +28,7 @@ export const sendMarketingEmail = task({
         from: { email: "tim@icemail.ai", name: "Timothy" },
         reply_to: { email: "tim@icemail.ai", name: "Timothy" },
         subject: email.subject,
-        content: [{ type: "text/plain", value: bodyText }],
+        content: [{ type: "text/html", value: html }],
       }),
     });
 
