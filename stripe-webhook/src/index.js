@@ -68,40 +68,44 @@ export default {
       if (url.searchParams.get("token") !== env.SEED_TOKEN) {
         return new Response("Unauthorized", { status: 401 });
       }
-      const toEmail = url.searchParams.get("to");
-      if (!toEmail) return new Response("Missing ?to= param", { status: 400 });
-      const toName = url.searchParams.get("name") || toEmail;
-      const emailId = url.searchParams.get("emailId") || MARKETING_SEQUENCE[0].id;
+      try {
+        const toEmail = url.searchParams.get("to");
+        if (!toEmail) return new Response("Missing ?to= param", { status: 400 });
+        const toName = url.searchParams.get("name") || toEmail;
+        const emailId = url.searchParams.get("emailId") || MARKETING_SEQUENCE[0].id;
 
-      const email = MARKETING_SEQUENCE.find((e) => e.id === emailId);
-      if (!email) return new Response(`Unknown emailId: ${emailId}`, { status: 400 });
+        const email = MARKETING_SEQUENCE.find((e) => e.id === emailId);
+        if (!email) return new Response(`Unknown emailId: ${emailId}`, { status: 400 });
 
-      const firstName = toName && toName !== toEmail ? toName.split(" ")[0] : "there";
-      const logoUrl = `${new URL(request.url).origin}/logo.svg`;
-      const html = email.html
-        .replace(/\{\{firstName\}\}/g, firstName)
-        .replace(/\{\{logoUrl\}\}/g, logoUrl);
+        const firstName = toName && toName !== toEmail ? toName.split(" ")[0] : "there";
+        const logoUrl = `${new URL(request.url).origin}/logo.svg`;
+        const html = email.html
+          .replace(/\{\{firstName\}\}/g, firstName)
+          .replace(/\{\{logoUrl\}\}/g, logoUrl);
 
-      const sgRes = await fetch("https://api.sendgrid.com/v3/mail/send", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          personalizations: [{ to: [{ email: toEmail, name: toName }] }],
-          from: { email: "tim@icemail.ai", name: "Timothy" },
-          reply_to: { email: "tim@icemail.ai", name: "Timothy" },
-          subject: email.subject,
-          content: [{ type: "text/html", value: html }],
-        }),
-      });
+        const sgRes = await fetch("https://api.sendgrid.com/v3/mail/send", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            personalizations: [{ to: [{ email: toEmail, name: toName }] }],
+            from: { email: "tim@icemail.ai", name: "Timothy" },
+            reply_to: { email: "tim@icemail.ai", name: "Timothy" },
+            subject: email.subject,
+            content: [{ type: "text/html", value: html }],
+          }),
+        });
 
-      if (!sgRes.ok) {
-        const err = await sgRes.text();
-        return new Response(`SendGrid error: ${sgRes.status} ${err}`, { status: 500 });
+        if (!sgRes.ok) {
+          const err = await sgRes.text();
+          return new Response(`SendGrid error: ${sgRes.status} ${err}`, { status: 500 });
+        }
+        return new Response(`Sent "${email.subject}" (${emailId}) to ${toEmail}`, { status: 200 });
+      } catch (e) {
+        return new Response(`Error: ${e.message}\n${e.stack}`, { status: 500 });
       }
-      return new Response(`Sent "${email.subject}" (${emailId}) to ${toEmail}`, { status: 200 });
     }
 
     // Test endpoint: verify Trigger.dev connection by firing send-signup-email immediately.
