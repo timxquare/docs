@@ -1,8 +1,39 @@
 import Stripe from "stripe";
 import { SIGNUP_FLOW_SEQUENCE } from "./sequences.js";
+import { SEED_EMAILS } from "./seed-emails.js";
 
 export default {
   async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    // One-time seed endpoint: populates KV with pre-existing Stripe customers.
+    // Visit /seed?token=<SEED_TOKEN> in browser once, then remove this block.
+    if (url.pathname === "/seed") {
+      if (url.searchParams.get("token") !== env.SEED_TOKEN) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      const ts = new Date().toISOString();
+      const existing = await env.SIGNUP_LOG.get("__seeded__");
+      if (existing) {
+        return new Response("Already seeded. Nothing to do.", { status: 200 });
+      }
+      for (let i = 0; i < SEED_EMAILS.length; i += 100) {
+        await Promise.all(
+          SEED_EMAILS.slice(i, i + 100).map((email) =>
+            env.SIGNUP_LOG.put(
+              email,
+              JSON.stringify({ signedUpAt: "pre-existing", importedAt: ts })
+            )
+          )
+        );
+      }
+      await env.SIGNUP_LOG.put("__seeded__", ts);
+      return new Response(
+        `Seeded ${SEED_EMAILS.length} emails into SIGNUP_LOG.`,
+        { status: 200 }
+      );
+    }
+
     if (request.method !== "POST") {
       return new Response("Method not allowed", { status: 405 });
     }
