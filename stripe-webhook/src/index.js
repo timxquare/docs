@@ -34,8 +34,6 @@ export default {
       const toName = customer.name || toEmail;
 
       if (toEmail) {
-        // Send both emails in the background so we ACK Stripe immediately.
-        // Day 1 fires immediately; Day 2 is scheduled via SendGrid's send_at.
         ctx.waitUntil(
           Promise.all([
             sendDay1Email(env, toEmail, toName).catch((err) =>
@@ -43,6 +41,9 @@ export default {
             ),
             sendDay2Email(env, toEmail, toName).catch((err) =>
               console.error(`Day 2 email failed for ${toEmail}:`, err.message)
+            ),
+            sendDay5Email(env, toEmail, toName).catch((err) =>
+              console.error(`Day 5 email failed for ${toEmail}:`, err.message)
             ),
           ])
         );
@@ -54,6 +55,53 @@ export default {
     });
   },
 };
+
+// Returns a Unix timestamp for 9am ET on the next weekday that is at least
+// `daysFromNow` calendar days in the future, respecting DST automatically.
+function nextWeekdaySendAt(daysFromNow) {
+  const MS_PER_DAY = 86400 * 1000;
+  const SEND_HOUR_ET = 9; // 9 AM ET
+
+  let d = new Date(Date.now() + daysFromNow * MS_PER_DAY);
+
+  // Advance past weekends
+  while (true) {
+    const dow = d.toLocaleDateString("en-US", {
+      timeZone: "America/New_York",
+      weekday: "short",
+    });
+    if (dow !== "Sat" && dow !== "Sun") break;
+    d = new Date(d.getTime() + MS_PER_DAY);
+  }
+
+  // Get YYYY-MM-DD in ET
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(d);
+  const year = parts.find((p) => p.type === "year").value;
+  const month = parts.find((p) => p.type === "month").value;
+  const day = parts.find((p) => p.type === "day").value;
+  const dateStr = `${year}-${month}-${day}`;
+
+  // Determine the UTC offset for ET on this date (handles EST/EDT automatically)
+  const noonUTC = new Date(`${dateStr}T12:00:00Z`);
+  const etHourAtNoon = parseInt(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York",
+      hour: "2-digit",
+      hour12: false,
+    }).format(noonUTC)
+  );
+  const utcOffsetHours = 12 - etHourAtNoon; // 5 for EST, 4 for EDT
+
+  const sendUTCHour = SEND_HOUR_ET + utcOffsetHours;
+  return Math.floor(
+    new Date(`${dateStr}T${String(sendUTCHour).padStart(2, "0")}:00:00Z`).getTime() / 1000
+  );
+}
 
 function getFirstName(toName, toEmail) {
   return toName && toName !== toEmail ? toName.split(" ")[0] : "there";
@@ -126,10 +174,39 @@ async function sendDay2Email(env, toEmail, toName) {
     `P.S. Yes, the irony isn't lost on us. A deliverability email sent through a third-party tool that may or may not have landed in Primary. If this is sitting in Promotions, drag it over and we'll consider it a personal favor.`,
   ].join("\n");
 
-  // Schedule for 24 hours after signup — Gmail fallback can't schedule so
-  // we don't fall back here; a missed Day 2 is better than a double-send.
-  const sendAt = Math.floor(Date.now() / 1000) + 86400;
-  await sendViaSendGrid(env, toEmail, toName, subject, bodyText, sendAt);
+  await sendViaSendGrid(env, toEmail, toName, subject, bodyText, nextWeekdaySendAt(2));
+}
+
+async function sendDay5Email(env, toEmail, toName) {
+  const firstName = getFirstName(toName, toEmail);
+
+  const subject = "what are you trying to do with icemail?";
+  const bodyText = [
+    `Hey ${firstName},`,
+    ``,
+    `Timothy again. Last email from me in this welcome flow, promise.`,
+    ``,
+    `Wanted to ask: what made you sign up for icemail? Running an agency, doing outbound for your own startup, something else?`,
+    ``,
+    `Reason I'm asking is a bit selfish. The more I know about how people actually use the platform, the better I can prioritize what to build. Microsoft DKIM automation, bulk provisioning, and pay-as-you-go pricing all shipped this year based on replies to emails like this one.`,
+    ``,
+    `If you've got 30 seconds, reply and tell me:`,
+    ``,
+    `1. What you're sending (agency outbound, SaaS founder-led, recruiting, or other)`,
+    `2. Roughly how many mailboxes you're planning to run`,
+    `3. One thing that would make icemail obviously better for you`,
+    ``,
+    `In return, if you're stuck on anything (setup, integrations, domain strategy), send me a screenshot and I'll take a look personally.`,
+    ``,
+    `Thanks for trying us out.`,
+    ``,
+    `Timothy`,
+    `Founder, icemail.ai`,
+    ``,
+    `P.S. Honest moment. This sequence was sent through a third-party tool, not our own infrastructure.`,
+  ].join("\n");
+
+  await sendViaSendGrid(env, toEmail, toName, subject, bodyText, nextWeekdaySendAt(5));
 }
 
 async function sendViaSendGrid(env, toEmail, toName, subject, bodyText, sendAt) {
