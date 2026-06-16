@@ -7,4 +7,8 @@ compatibility_flags = ["nodejs_compat"]
 # Secrets are NOT set here. Set them with `wrangler secret put <NAME>`:
 #   STRIPE_SECRET_KEY
 #   STRIPE_WEBHOOK_SECRET
-#   SENDGRID_API_KEY
+#   SENDGRID_API_KEY          (primary sender)
+#   GMAIL_CLIENT_ID           (fallback sender)
+#   GMAIL_CLIENT_SECRET       (fallback sender)
+#   GMAIL_REFRESH_TOKEN       (fallback sender)
+#   GMAIL_SENDER_ADDRESS      (fallback sender)
