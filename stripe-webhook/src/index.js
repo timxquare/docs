@@ -50,24 +50,32 @@ export default {
 };
 
 async function sendFounderEmail(env, toEmail, toName) {
-  const firstName = toName.split(" ")[0];
+  const firstName = toName && toName !== toEmail
+    ? toName.split(" ")[0]
+    : "there";
 
-  const subject = "Welcome - glad you're here";
+  const subject = "you're in";
   const bodyText = [
-    `Hi ${firstName},`,
+    `Hey ${firstName},`,
     ``,
-    `I'm Tim, founder of Icemail. I wanted to reach out personally to welcome you.`,
+    `Timothy here, founder of icemail. Thanks for signing up.`,
     ``,
-    `A few things I'd love to know:`,
-    `- What brought you to Icemail?`,
-    `- What are you hoping to get done?`,
-    `- Is there anything that felt confusing or unclear?`,
+    `You now have access to Google Workspace and Microsoft 365 mailboxes with DKIM, SPF, and DMARC already configured. No DNS work on your end.`,
     ``,
-    `I read every reply. If you run into anything, just hit reply here and it comes straight to me.`,
+    `Three steps to get your first batch sending:`,
     ``,
-    `Timothy Vadde`,
-    `Founder @ Icemail`,
-    `icemail.ai`,
+    `1. Add a domain (or a few) in the dashboard`,
+    `2. Pick how many mailboxes per domain. 2 or 3 is a good starting point.`,
+    `3. Hit provision. The rest runs in the background.`,
+    ``,
+    `When they're ready, plug them straight into Instantly, Smartlead, or lemlist from the integrations tab.`,
+    ``,
+    `If anything looks off, reply to this email. It comes to me directly.`,
+    ``,
+    `Timothy`,
+    `Founder, icemail(.)ai`,
+    ``,
+    `P.S. This was sent through a third-party tool, not icemail itself. So don't judge us if it landed somewhere other than Primary. Deliverability is humbling, even for the people who do it for a living.`,
   ].join("\n");
 
   try {
