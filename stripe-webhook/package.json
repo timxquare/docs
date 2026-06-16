@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "trigger:deploy": "trigger.dev deploy"
   },
   "dependencies": {
+    "@trigger.dev/sdk": "^4.0.0",
     "stripe": "^16.0.0"
   },
   "devDependencies": {

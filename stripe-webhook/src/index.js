@@ -77,14 +77,12 @@ export default {
 };
 
 async function handleNewCustomer(env, toEmail, toName) {
-  // Deduplicate: skip if this email has already been through the signup flow
   const existing = await env.SIGNUP_LOG.get(toEmail);
   if (existing) {
     console.log(`Signup flow already sent to ${toEmail}, skipping.`);
     return;
   }
 
-  // Log before sending so a retry can't double-send
   await env.SIGNUP_LOG.put(
     toEmail,
     JSON.stringify({ name: toName, email: toEmail, signedUpAt: new Date().toISOString() })
@@ -92,20 +90,49 @@ async function handleNewCustomer(env, toEmail, toName) {
 
   const firstName = getFirstName(toName, toEmail);
 
+  // Day 1: send immediately via SendGrid (with Gmail fallback)
+  const day1 = SIGNUP_FLOW_SEQUENCE.find((s) => s.day === 1);
+  await sendDay1(env, toEmail, toName, day1.subject, day1.getBody(firstName)).catch(
+    (err) => console.error(`Day 1 email failed for ${toEmail}:`, err.message)
+  );
+
+  // Day 2 and Day 5: hand off to Trigger.dev for reliable scheduled delivery
+  const scheduled = SIGNUP_FLOW_SEQUENCE.filter((s) => s.day !== 1);
   await Promise.all(
-    SIGNUP_FLOW_SEQUENCE.map(({ day, subject, getBody }) => {
-      const bodyText = getBody(firstName);
-      const sendAt = day === 1 ? null : nextWeekdaySendAt(day);
-      return sendEmail(env, toEmail, toName, subject, bodyText, sendAt).catch(
-        (err) =>
-          console.error(`Day ${day} email failed for ${toEmail}:`, err.message)
-      );
-    })
+    scheduled.map(({ day }) =>
+      triggerScheduledEmail(env, toEmail, toName, day).catch((err) =>
+        console.error(`Day ${day} trigger failed for ${toEmail}:`, err.message)
+      )
+    )
   );
 }
 
+// Trigger a Trigger.dev task for scheduled delivery.
+// Trigger.dev calls send-signup-email at the computed weekday 9am ET time.
+async function triggerScheduledEmail(env, toEmail, toName, day) {
+  const runAt = new Date(nextWeekdaySendAt(day) * 1000).toISOString();
+
+  const res = await fetch(
+    "https://api.trigger.dev/api/v1/tasks/send-signup-email/trigger",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.TRIGGER_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        payload: { toEmail, toName, day },
+        options: { delay: runAt },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Trigger.dev failed: ${res.status} ${await res.text()}`);
+  }
+}
+
 // Returns a Unix timestamp for 9 AM ET on the next weekday >= daysFromNow.
-// Handles EST/EDT automatically via Intl.
 function nextWeekdaySendAt(daysFromNow) {
   const MS_PER_DAY = 86400 * 1000;
   const SEND_HOUR_ET = 9;
@@ -140,13 +167,11 @@ function nextWeekdaySendAt(daysFromNow) {
       hour12: false,
     }).format(noonUTC)
   );
-  const utcOffsetHours = 12 - etHourAtNoon; // 5 for EST, 4 for EDT
+  const utcOffsetHours = 12 - etHourAtNoon;
 
   const sendUTCHour = SEND_HOUR_ET + utcOffsetHours;
   return Math.floor(
-    new Date(
-      `${dateStr}T${String(sendUTCHour).padStart(2, "0")}:00:00Z`
-    ).getTime() / 1000
+    new Date(`${dateStr}T${String(sendUTCHour).padStart(2, "0")}:00:00Z`).getTime() / 1000
   );
 }
 
@@ -154,34 +179,29 @@ function getFirstName(toName, toEmail) {
   return toName && toName !== toEmail ? toName.split(" ")[0] : "there";
 }
 
-async function sendEmail(env, toEmail, toName, subject, bodyText, sendAt) {
+async function sendDay1(env, toEmail, toName, subject, bodyText) {
   try {
-    await sendViaSendGrid(env, toEmail, toName, subject, bodyText, sendAt);
+    await sendViaSendGrid(env, toEmail, toName, subject, bodyText);
   } catch (sgErr) {
-    // Gmail fallback only for immediate sends — it can't schedule
-    if (sendAt) throw sgErr;
     console.error("SendGrid failed, falling back to Gmail:", sgErr.message);
     await sendViaGmail(env, toEmail, toName, subject, bodyText);
   }
 }
 
-async function sendViaSendGrid(env, toEmail, toName, subject, bodyText, sendAt) {
-  const payload = {
-    personalizations: [{ to: [{ email: toEmail, name: toName }] }],
-    from: { email: "tim@icemail.ai", name: "Tim from Icemail" },
-    reply_to: { email: "tim@icemail.ai", name: "Tim from Icemail" },
-    subject,
-    content: [{ type: "text/plain", value: bodyText }],
-    ...(sendAt ? { send_at: sendAt } : {}),
-  };
-
+async function sendViaSendGrid(env, toEmail, toName, subject, bodyText) {
   const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: toEmail, name: toName }] }],
+      from: { email: "tim@icemail.ai", name: "Tim from Icemail" },
+      reply_to: { email: "tim@icemail.ai", name: "Tim from Icemail" },
+      subject,
+      content: [{ type: "text/plain", value: bodyText }],
+    }),
   });
 
   if (!res.ok) {

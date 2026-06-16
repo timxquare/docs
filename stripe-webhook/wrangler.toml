@@ -14,7 +14,8 @@ id = "db14596b00c841ceb6da9f36ce0e9daa"
 # Secrets are NOT set here. Set them with `wrangler secret put <NAME>`:
 #   STRIPE_SECRET_KEY
 #   STRIPE_WEBHOOK_SECRET
-#   SENDGRID_API_KEY          (primary sender)
+#   SENDGRID_API_KEY          (primary sender — also set in Trigger.dev env vars)
+#   TRIGGER_SECRET_KEY        (from trigger.dev dashboard → API Keys)
 #   GMAIL_CLIENT_ID           (fallback sender)
 #   GMAIL_CLIENT_SECRET       (fallback sender)
 #   GMAIL_REFRESH_TOKEN       (fallback sender)
