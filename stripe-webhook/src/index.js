@@ -49,30 +49,9 @@ export default {
   },
 };
 
-async function getAccessToken(env) {
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: env.GMAIL_CLIENT_ID,
-      client_secret: env.GMAIL_CLIENT_SECRET,
-      refresh_token: env.GMAIL_REFRESH_TOKEN,
-      grant_type: "refresh_token",
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`Token refresh failed: ${res.status} ${await res.text()}`);
-  }
-  const data = await res.json();
-  return data.access_token;
-}
-
 async function sendFounderEmail(env, toEmail, toName) {
-  const accessToken = await getAccessToken(env);
   const firstName = toName.split(" ")[0];
 
-  const subject = "Welcome - glad you're here";
   const bodyText = [
     `Hi ${firstName},`,
     ``,
@@ -90,39 +69,24 @@ async function sendFounderEmail(env, toEmail, toName) {
     `icemail.ai`,
   ].join("\n");
 
-  const rawMessage = [
-    `From: Timothy Vadde <${env.GMAIL_SENDER_ADDRESS}>`,
-    `To: ${toEmail}`,
-    `Subject: ${subject}`,
-    `Content-Type: text/plain; charset=utf-8`,
-    ``,
-    bodyText,
-  ].join("\r\n");
+  const payload = {
+    personalizations: [{ to: [{ email: toEmail, name: toName }] }],
+    from: { email: "tim@icemail.ai", name: "Timothy Vadde" },
+    reply_to: { email: "tim@icemail.ai", name: "Timothy Vadde" },
+    subject: "Welcome - glad you're here",
+    content: [{ type: "text/plain", value: bodyText }],
+  };
 
-  const res = await fetch(
-    "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ raw: base64url(rawMessage) }),
-    }
-  );
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
-    throw new Error(`Gmail send failed: ${res.status} ${await res.text()}`);
+    throw new Error(`SendGrid send failed: ${res.status} ${await res.text()}`);
   }
-}
-
-// Base64url-encode a UTF-8 string (Gmail API expects RFC 4648 base64url)
-function base64url(str) {
-  const bytes = new TextEncoder().encode(str);
-  let binary = "";
-  for (const b of bytes) binary += String.fromCharCode(b);
-  return btoa(binary)
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
 }
