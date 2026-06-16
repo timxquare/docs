@@ -87,7 +87,7 @@ async function handleNewCustomer(env, toEmail, toName) {
   // Log before sending so a retry can't double-send
   await env.SIGNUP_LOG.put(
     toEmail,
-    JSON.stringify({ signedUpAt: new Date().toISOString() })
+    JSON.stringify({ name: toName, email: toEmail, signedUpAt: new Date().toISOString() })
   );
 
   const firstName = getFirstName(toName, toEmail);
