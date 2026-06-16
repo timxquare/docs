@@ -55,7 +55,7 @@ export default {
       if (url.searchParams.get("token") !== env.SEED_TOKEN) {
         return new Response("Unauthorized", { status: 401 });
       }
-      ctx.waitUntil(runBackfill(env));
+      ctx.waitUntil(runBackfill(env, new URL(request.url).origin));
       return new Response(
         "Backfill started in background. Check Trigger.dev dashboard for scheduled runs.",
         { status: 200 }
@@ -205,9 +205,10 @@ export default {
       const customer = event.data.object;
       const toEmail = customer.email;
       const toName = customer.name || toEmail;
+      const workerUrl = new URL(request.url).origin;
 
       if (toEmail) {
-        ctx.waitUntil(handleNewCustomer(env, toEmail, toName));
+        ctx.waitUntil(handleNewCustomer(env, toEmail, toName, workerUrl));
       }
     }
 
@@ -219,7 +220,7 @@ export default {
 
 // Fetches all Stripe customers created in the last 30 days and schedules
 // Day 2, Day 5, and all 9 marketing emails for any not yet sequenced.
-async function runBackfill(env) {
+async function runBackfill(env, workerUrl) {
   const since = Math.floor(Date.now() / 1000) - 30 * 86400; // 30 days ago
   let startingAfter = null;
   let queued = 0;
@@ -245,7 +246,6 @@ async function runBackfill(env) {
       if (!toEmail) continue;
 
       const existing = await env.SIGNUP_LOG.get(toEmail);
-      // Only backfill those seeded as "pre-existing" (no sequence triggered yet)
       if (existing) {
         const parsed = JSON.parse(existing);
         if (parsed.sequencedAt || parsed.signedUpAt !== "pre-existing") {
@@ -254,23 +254,21 @@ async function runBackfill(env) {
         }
       }
 
-      // Start full sequence from today: Day 2, Day 5, and all 9 marketing emails
       const scheduledSequence = SIGNUP_FLOW_SEQUENCE.filter((s) => s.day !== 1);
 
       await Promise.all([
         ...scheduledSequence.map(({ day }) =>
-          triggerScheduledEmail(env, toEmail, toName, day).catch((e) =>
+          triggerScheduledEmail(env, toEmail, toName, day, day, workerUrl).catch((e) =>
             console.error(`Backfill signup day ${day} failed for ${toEmail}:`, e.message)
           )
         ),
         ...MARKETING_SEQUENCE.map(({ id, day }) =>
-          triggerMarketingEmail(env, toEmail, toName, id, day).catch((e) =>
+          triggerMarketingEmail(env, toEmail, toName, id, day, day, workerUrl).catch((e) =>
             console.error(`Backfill marketing ${id} failed for ${toEmail}:`, e.message)
           )
         ),
       ]);
 
-      // Mark as sequenced so a re-run won't double-send
       await env.SIGNUP_LOG.put(
         toEmail,
         JSON.stringify({
@@ -290,7 +288,7 @@ async function runBackfill(env) {
   console.log(`Backfill complete: ${queued} sequenced, ${skipped} skipped.`);
 }
 
-async function handleNewCustomer(env, toEmail, toName) {
+async function handleNewCustomer(env, toEmail, toName, workerUrl) {
   const existing = await env.SIGNUP_LOG.get(toEmail);
   if (existing) {
     console.log(`Signup flow already sent to ${toEmail}, skipping.`);
@@ -310,29 +308,28 @@ async function handleNewCustomer(env, toEmail, toName) {
     (err) => console.error(`Day 1 email failed for ${toEmail}:`, err.message)
   );
 
-  // Signup flow Day 2 + Day 5: Trigger.dev, random weekday time
+  // Days 2 + 5: schedule via Trigger.dev → Worker sends
   const scheduledSignup = SIGNUP_FLOW_SEQUENCE.filter((s) => s.day !== 1);
   await Promise.all(
     scheduledSignup.map(({ day }) =>
-      triggerScheduledEmail(env, toEmail, toName, day).catch((err) =>
+      triggerScheduledEmail(env, toEmail, toName, day, day, workerUrl).catch((err) =>
         console.error(`Signup day ${day} trigger failed for ${toEmail}:`, err.message)
       )
     )
   );
 
-  // Marketing sequence: 9 emails, one per week starting at Day 12
+  // 9 marketing emails: schedule via Trigger.dev → Worker sends
   await Promise.all(
     MARKETING_SEQUENCE.map(({ id, day }) =>
-      triggerMarketingEmail(env, toEmail, toName, id, day).catch((err) =>
+      triggerMarketingEmail(env, toEmail, toName, id, day, day, workerUrl).catch((err) =>
         console.error(`Marketing email ${id} trigger failed for ${toEmail}:`, err.message)
       )
     )
   );
 }
 
-// daysFromNow defaults to day — pass a smaller value for backfill
 // Trigger.dev is only the scheduler; actual sending happens via /send-email on this Worker.
-async function triggerScheduledEmail(env, toEmail, toName, day, daysFromNow = day) {
+async function triggerScheduledEmail(env, toEmail, toName, day, daysFromNow = day, workerUrl) {
   const runAt = nextWeekdaySendAt(daysFromNow);
   const res = await fetch(
     "https://api.trigger.dev/api/v1/tasks/send-signup-email/trigger",
@@ -343,7 +340,7 @@ async function triggerScheduledEmail(env, toEmail, toName, day, daysFromNow = da
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        payload: { toEmail, toName, day, workerUrl: env.WORKER_URL },
+        payload: { toEmail, toName, day, workerUrl },
         options: { delay: runAt },
       }),
     }
@@ -353,8 +350,7 @@ async function triggerScheduledEmail(env, toEmail, toName, day, daysFromNow = da
   }
 }
 
-// daysFromNow defaults to day — pass a smaller value for backfill
-async function triggerMarketingEmail(env, toEmail, toName, emailId, day, daysFromNow = day) {
+async function triggerMarketingEmail(env, toEmail, toName, emailId, day, daysFromNow = day, workerUrl) {
   const runAt = nextWeekdaySendAt(daysFromNow);
   const res = await fetch(
     "https://api.trigger.dev/api/v1/tasks/send-marketing-email/trigger",
@@ -365,7 +361,7 @@ async function triggerMarketingEmail(env, toEmail, toName, emailId, day, daysFro
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        payload: { toEmail, toName, emailId, workerUrl: env.WORKER_URL },
+        payload: { toEmail, toName, emailId, workerUrl },
         options: { delay: runAt },
       }),
     }
