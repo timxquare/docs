@@ -122,34 +122,20 @@ async function runBackfill(env) {
         }
       }
 
-      // Days since this customer signed up on Stripe
-      const daysSinceSignup = (Date.now() / 1000 - customer.created) / 86400;
-
-      // Schedule signup flow emails (Day 2, 5) that haven't fired yet
+      // Start full sequence from today: Day 2, Day 5, and all 9 marketing emails
       const scheduledSequence = SIGNUP_FLOW_SEQUENCE.filter((s) => s.day !== 1);
-      // Schedule marketing emails that haven't fired yet
-      // daysFromNow = target day - days already elapsed (min 1 so it's always future)
-      const daysElapsed = Math.floor(daysSinceSignup);
 
       await Promise.all([
-        // Signup flow: only emails whose day hasn't passed yet
-        ...scheduledSequence
-          .filter(({ day }) => daysElapsed < day)
-          .map(({ day }) => {
-            const daysFromNow = Math.max(1, day - daysElapsed);
-            return triggerScheduledEmail(env, toEmail, toName, day, daysFromNow).catch((e) =>
-              console.error(`Backfill signup day ${day} failed for ${toEmail}:`, e.message)
-            );
-          }),
-        // Marketing emails: only ones whose day hasn't passed yet
-        ...MARKETING_SEQUENCE
-          .filter(({ day }) => daysElapsed < day)
-          .map(({ id, day }) => {
-            const daysFromNow = Math.max(1, day - daysElapsed);
-            return triggerMarketingEmail(env, toEmail, toName, id, day, daysFromNow).catch((e) =>
-              console.error(`Backfill marketing ${id} failed for ${toEmail}:`, e.message)
-            );
-          }),
+        ...scheduledSequence.map(({ day }) =>
+          triggerScheduledEmail(env, toEmail, toName, day).catch((e) =>
+            console.error(`Backfill signup day ${day} failed for ${toEmail}:`, e.message)
+          )
+        ),
+        ...MARKETING_SEQUENCE.map(({ id, day }) =>
+          triggerMarketingEmail(env, toEmail, toName, id, day).catch((e) =>
+            console.error(`Backfill marketing ${id} failed for ${toEmail}:`, e.message)
+          )
+        ),
       ]);
 
       // Mark as sequenced so a re-run won't double-send
