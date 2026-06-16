@@ -49,6 +49,44 @@ export default {
       );
     }
 
+    // Test endpoint: send one marketing email immediately (no scheduling).
+    // Usage: /test-marketing-email?token=<SEED_TOKEN>&to=email@example.com&name=First+Last&emailId=prewarmed-01
+    if (url.pathname === "/test-marketing-email") {
+      if (url.searchParams.get("token") !== env.SEED_TOKEN) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      const toEmail = url.searchParams.get("to");
+      if (!toEmail) return new Response("Missing ?to= param", { status: 400 });
+      const toName = url.searchParams.get("name") || toEmail;
+      const emailId = url.searchParams.get("emailId") || MARKETING_SEQUENCE[0].id;
+
+      const email = MARKETING_SEQUENCE.find((e) => e.id === emailId);
+      if (!email) return new Response(`Unknown emailId: ${emailId}`, { status: 400 });
+
+      const firstName = toName && toName !== toEmail ? toName.split(" ")[0] : "there";
+      const html = email.html.replace(/\{\{firstName\}\}/g, firstName);
+
+      const sgRes = await fetch("https://api.sendgrid.com/v3/mail/send", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${env.SENDGRID_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          personalizations: [{ to: [{ email: toEmail, name: toName }] }],
+          from: { email: "tim@crew.icemail.ai", name: "Icemail Crew" },
+          reply_to: { email: "tim@icemail.ai", name: "Timothy" },
+          subject: email.subject,
+          content: [{ type: "text/html", value: html }],
+        }),
+      });
+
+      if (!sgRes.ok) {
+        const err = await sgRes.text();
+        return new Response(`SendGrid error: ${sgRes.status} ${err}`, { status: 500 });
+      }
+      return new Response(`Sent "${email.subject}" (${emailId}) to ${toEmail}`, { status: 200 });
+    }
 
     const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
