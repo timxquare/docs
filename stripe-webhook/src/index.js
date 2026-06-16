@@ -35,13 +35,21 @@ export default {
       );
     }
 
-    if (request.method !== "POST") {
-      return new Response("Method not allowed", { status: 405 });
+    // One-time backfill: triggers Day 2+ sequences for all Stripe customers
+    // created in the last 30 days who haven't been sequenced yet.
+    // Visit /backfill?token=<SEED_TOKEN> in browser once.
+    if (url.pathname === "/backfill") {
+      if (url.searchParams.get("token") !== env.SEED_TOKEN) {
+        return new Response("Unauthorized", { status: 401 });
+      }
+      ctx.waitUntil(runBackfill(env));
+      return new Response(
+        "Backfill started in background. Check Trigger.dev dashboard for scheduled runs.",
+        { status: 200 }
+      );
     }
 
-    const stripe = new Stripe(env.STRIPE_SECRET_KEY, {
-      httpClient: Stripe.createFetchHttpClient(),
-    });
+
     const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
     const sig = request.headers.get("stripe-signature");
@@ -76,6 +84,78 @@ export default {
     });
   },
 };
+
+// Fetches all Stripe customers created in the last 30 days and schedules
+// Day 2, Day 5, and all 9 marketing emails for any not yet sequenced.
+async function runBackfill(env) {
+  const since = Math.floor(Date.now() / 1000) - 30 * 86400; // 30 days ago
+  let startingAfter = null;
+  let queued = 0;
+  let skipped = 0;
+
+  while (true) {
+    const params = new URLSearchParams({
+      limit: "100",
+      "created[gte]": String(since),
+    });
+    if (startingAfter) params.set("starting_after", startingAfter);
+
+    const res = await fetch(`https://api.stripe.com/v1/customers?${params}`, {
+      headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` },
+    });
+    if (!res.ok) throw new Error(`Stripe list failed: ${res.status} ${await res.text()}`);
+
+    const data = await res.json();
+
+    for (const customer of data.data) {
+      const toEmail = customer.email;
+      const toName = customer.name || toEmail;
+      if (!toEmail) continue;
+
+      const existing = await env.SIGNUP_LOG.get(toEmail);
+      // Only backfill those seeded as "pre-existing" (no sequence triggered yet)
+      if (existing) {
+        const parsed = JSON.parse(existing);
+        if (parsed.sequencedAt || parsed.signedUpAt !== "pre-existing") {
+          skipped++;
+          continue;
+        }
+      }
+
+      // Trigger Day 2, Day 5, and all 9 marketing emails from now
+      const scheduledSequence = SIGNUP_FLOW_SEQUENCE.filter((s) => s.day !== 1);
+      await Promise.all([
+        ...scheduledSequence.map(({ day }) =>
+          triggerScheduledEmail(env, toEmail, toName, day).catch((e) =>
+            console.error(`Backfill signup day ${day} failed for ${toEmail}:`, e.message)
+          )
+        ),
+        ...MARKETING_SEQUENCE.map(({ id, day }) =>
+          triggerMarketingEmail(env, toEmail, toName, id, day).catch((e) =>
+            console.error(`Backfill marketing ${id} failed for ${toEmail}:`, e.message)
+          )
+        ),
+      ]);
+
+      // Mark as sequenced so a re-run won't double-send
+      await env.SIGNUP_LOG.put(
+        toEmail,
+        JSON.stringify({
+          name: toName,
+          email: toEmail,
+          signedUpAt: "pre-existing",
+          sequencedAt: new Date().toISOString(),
+        })
+      );
+      queued++;
+    }
+
+    if (!data.has_more) break;
+    startingAfter = data.data[data.data.length - 1].id;
+  }
+
+  console.log(`Backfill complete: ${queued} sequenced, ${skipped} skipped.`);
+}
 
 async function handleNewCustomer(env, toEmail, toName) {
   const existing = await env.SIGNUP_LOG.get(toEmail);
