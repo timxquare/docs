@@ -106,7 +106,10 @@ export async function request(url, opts = {}) {
 
     if (res.ok) return json;
 
-    const retryable = res.status === 429 || res.status >= 500;
+    // A definitive API rejection (JSON with success:false) won't change on
+    // retry — fail fast. Only retry genuine transient conditions.
+    const definitiveReject = json && json.success === false;
+    const retryable = !definitiveReject && (res.status === 429 || res.status >= 500);
     if (retryable && attempt <= maxRetries) {
       // Honor Retry-After header if present, else exponential backoff.
       const retryAfter = Number(res.headers.get("retry-after"));
