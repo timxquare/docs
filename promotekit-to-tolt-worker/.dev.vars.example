@@ -1,0 +1,6 @@
+# For LOCAL testing only (`npx wrangler dev`). Copy to ".dev.vars".
+# In production these are set with `npx wrangler secret put <NAME>` instead.
+
+PROMOTEKIT_API_KEY=your_promotekit_key
+TOLT_API_KEY=your_tolt_key
+MIGRATION_SECRET=pick-any-random-password

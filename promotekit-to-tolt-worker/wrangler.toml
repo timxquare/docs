@@ -1,0 +1,36 @@
+# Cloudflare Worker that migrates PromoteKit -> Tolt.
+# Deploy with:  npx wrangler deploy
+name = "promotekit-to-tolt-migration"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+# KV stores migration progress so the job is resumable.
+# Create it once with: npx wrangler kv namespace create MIGRATION_KV
+# Then paste the returned id below (replace REPLACE_WITH_KV_ID).
+[[kv_namespaces]]
+binding = "MIGRATION_KV"
+id = "REPLACE_WITH_KV_ID"
+
+# Cron Trigger: every minute, the Worker processes the next batch of records
+# automatically until the migration is complete. Safe when idle (does nothing
+# until you POST /start).
+[triggers]
+crons = ["* * * * *"]
+
+# Non-secret settings.
+[vars]
+# The Tolt program every imported affiliate is added to (required).
+TOLT_PROGRAM_ID = "REPLACE_WITH_TOLT_PROGRAM_ID"
+# Set to "true" only if PromoteKit returns money already in cents.
+PK_AMOUNTS_IN_CENTS = "false"
+# How many records to process per minute (per cron tick / per /run call).
+# Keep modest to stay under Worker subrequest limits (50 on free, 1000 paid).
+BATCH_SIZE = "15"
+# PromoteKit endpoint paths (override if --inspect shows they differ).
+PK_AFFILIATES_PATH = "/affiliates"
+PK_REFERRALS_PATH = "/referrals"
+
+# Secrets are NOT set here. Set them with `npx wrangler secret put <NAME>`:
+#   PROMOTEKIT_API_KEY   (PromoteKit dashboard -> Settings -> API Keys)
+#   TOLT_API_KEY         (Tolt dashboard -> Settings -> Integrations)
+#   MIGRATION_SECRET     (any random password; protects the control URLs)
