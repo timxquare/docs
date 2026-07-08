@@ -4,7 +4,8 @@ main = "src/index.ts"
 compatibility_date = "2025-06-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Base URL of the Icemail REST API the tools call. Override per-environment if needed.
+# Default API base — used for `wrangler dev` (localhost) and as a fallback.
+# Per-tenant API base URLs live in src/tenants.ts, keyed by hostname.
 [vars]
 ICEMAIL_API_BASE = "https://api.icemail.ai"
 
@@ -19,12 +20,23 @@ class_name = "IcemailMCP"
 tag = "v1"
 new_sqlite_classes = ["IcemailMCP"]
 
-# Serve the Worker on the custom domain mcp.icemail.ai.
-# The zone `icemail.ai` must already be active on this Cloudflare account —
-# Wrangler will create/attach the DNS record and certificate on first deploy.
+# One custom-domain route per whitelabel tenant. Each hostname must also have a
+# matching entry in src/tenants.ts. The tenant's zone must be active on this
+# Cloudflare account — Wrangler creates the DNS record + TLS cert on first deploy.
+#
+# Onboard a new whitelabel customer = add a route here + an entry in tenants.ts,
+# then `npm run deploy`.
 [[routes]]
 pattern = "mcp.icemail.ai"
 custom_domain = true
+
+# [[routes]]
+# pattern = "mcp.acmemail.com"
+# custom_domain = true
+
+# [[routes]]
+# pattern = "mcp.coldreach.io"
+# custom_domain = true
 
 [observability]
 enabled = true

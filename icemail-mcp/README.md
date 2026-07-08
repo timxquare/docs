@@ -9,6 +9,8 @@ It runs on **Cloudflare Workers** and is served at **`https://mcp.icemail.ai`**.
 
 Each user authenticates with **their own Icemail API key**, passed as `Authorization: Bearer <key>`. The Worker forwards that key to the Icemail REST API — it holds no shared server-side secret and stores nothing.
 
+It is **multi-tenant**: one Worker serves every whitelabel customer, each on their own hostname with their own API base URL. See [Whitelabel / multi-tenant](#whitelabel--multi-tenant).
+
 ---
 
 ## Tools
@@ -89,15 +91,97 @@ Copy `.dev.vars.example` to `.dev.vars` only if you need to point the tools at a
 
 ```
 MCP client (Claude / Cursor / ChatGPT)
-   │  Authorization: Bearer <ICEMAIL_API_KEY>
+   │  Host: mcp.<customer>.com   +   Authorization: Bearer <API_KEY>
    ▼
-mcp.icemail.ai  (Cloudflare Worker — this repo)
-   │  forwards the same key
+one Cloudflare Worker (this repo)
+   │  resolve tenant by Host  ──►  src/tenants.ts  { name, apiBase }
+   │  forward the same key
    ▼
-Icemail REST API  (ICEMAIL_API_BASE)
+that tenant's REST API  (tenant.apiBase)
 ```
 
-The Worker (`src/index.ts`) reads the bearer key off each request, hands it to the `McpAgent` session via `ctx.props`, and every tool calls the Icemail API on the user's behalf.
+The Worker (`src/index.ts`) resolves the tenant from the request hostname, reads the bearer key off the request, and hands both to the `McpAgent` session via `ctx.props`. Every tool then calls **that tenant's** API on the user's behalf, and the MCP server reports **that tenant's** name to the client.
+
+---
+
+## Whitelabel / multi-tenant
+
+You want many branded MCP servers — `mcp.acmemail.com`, `mcp.coldreach.io`, … — each pointing at a **different base URL**. This repo does that with **one Worker, routed by hostname**. No per-customer code fork.
+
+### How it works
+
+- **`src/tenants.ts`** is the registry: a map from hostname → `{ name, apiBase }`.
+  - `name` — the MCP server name shown in the customer's AI client (their branding).
+  - `apiBase` — the REST API base URL for that customer.
+- Each hostname is also a **custom-domain route** on the Worker (`wrangler.toml`).
+- On every request the Worker matches `Host` → tenant, and uses that tenant's `apiBase` and `name`.
+
+### Onboard a new whitelabel customer
+
+1. Add an entry to `src/tenants.ts`:
+   ```ts
+   "mcp.acmemail.com": { name: "Acme Mail", apiBase: "https://api.acmemail.com" },
+   ```
+2. Add a route in `wrangler.toml`:
+   ```toml
+   [[routes]]
+   pattern = "mcp.acmemail.com"
+   custom_domain = true
+   ```
+   The customer's zone (`acmemail.com`) must be active on this Cloudflare account so Wrangler can create the DNS record + TLS cert. (If it's on the customer's own Cloudflare account, add it there as a Worker route instead, or use the per-customer-Worker model below.)
+3. `npm run deploy`.
+
+That customer now connects at `https://mcp.acmemail.com/mcp` with their own API keys, and their client shows **“Acme Mail”**.
+
+### Verify a tenant resolves
+
+```bash
+curl https://mcp.acmemail.com/health
+# {"ok":true,"service":"icemail-mcp","tenant":"Acme Mail","host":"mcp.acmemail.com"}
+```
+
+### Scaling tenant config (zero-deploy onboarding)
+
+The code map is simplest and fully reviewable. If you'd rather onboard customers **without a code deploy**, move the registry into a KV namespace and look it up by hostname:
+
+1. `npx wrangler kv namespace create TENANTS` and bind it in `wrangler.toml`.
+2. In `resolveTenant`, fall back to `await env.TENANTS.get(host, "json")` when the host isn't in the code map.
+3. Onboard = `wrangler kv key put --binding TENANTS "mcp.acmemail.com" '{"name":"Acme Mail","apiBase":"https://api.acmemail.com"}'` + add the domain route.
+
+You still add the custom-domain route per host (that's a Cloudflare routing requirement), but the tenant's config no longer requires a redeploy.
+
+### Alternative: one Worker per customer (hard isolation)
+
+Prefer full isolation — separate Worker, Durable Objects, logs, limits, even separate Cloudflare accounts per customer? Use **Wrangler environments** instead of the shared Worker:
+
+```toml
+# wrangler.toml
+[env.acme]
+name = "acme-mcp"
+vars = { ICEMAIL_API_BASE = "https://api.acmemail.com" }
+routes = [{ pattern = "mcp.acmemail.com", custom_domain = true }]
+
+[env.coldreach]
+name = "coldreach-mcp"
+vars = { ICEMAIL_API_BASE = "https://api.coldreach.io" }
+routes = [{ pattern = "mcp.coldreach.io", custom_domain = true }]
+```
+
+Deploy each independently:
+
+```bash
+npx wrangler deploy --env acme
+npx wrangler deploy --env coldreach
+```
+
+| | Shared multi-tenant Worker (default) | One Worker per customer (environments) |
+|---|---|---|
+| Deploys | One, serves all | One per customer |
+| Isolation | Shared runtime & logs | Fully separate Worker/DO/logs/limits |
+| Onboarding | Add tenant entry + route (or KV, zero-deploy) | Add `[env.x]` block + deploy |
+| Best for | Many customers, low ops | Few customers, strict isolation / separate billing |
+
+Both use the exact same `src/index.ts` — the shared model reads `apiBase` from the tenant registry; the environments model reads it from each env's `ICEMAIL_API_BASE` (the built-in fallback). You can start multi-tenant and peel a big customer out into their own environment later without code changes.
 
 ---
 
