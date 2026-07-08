@@ -1,0 +1,30 @@
+# Icemail remote MCP server — deploys to Cloudflare Workers, served at mcp.icemail.ai
+name = "icemail-mcp"
+main = "src/index.ts"
+compatibility_date = "2025-06-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Base URL of the Icemail REST API the tools call. Override per-environment if needed.
+[vars]
+ICEMAIL_API_BASE = "https://api.icemail.ai"
+
+# McpAgent stores each MCP session in a Durable Object. The binding name MUST be
+# MCP_OBJECT — that is the name the `agents` SDK looks up.
+[[durable_objects.bindings]]
+name = "MCP_OBJECT"
+class_name = "IcemailMCP"
+
+# SQLite-backed Durable Objects are required by McpAgent.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["IcemailMCP"]
+
+# Serve the Worker on the custom domain mcp.icemail.ai.
+# The zone `icemail.ai` must already be active on this Cloudflare account —
+# Wrangler will create/attach the DNS record and certificate on first deploy.
+[[routes]]
+pattern = "mcp.icemail.ai"
+custom_domain = true
+
+[observability]
+enabled = true

@@ -1,0 +1,136 @@
+---
+title: "MCP Server"
+description: "Connect Claude, Cursor, ChatGPT, and any MCP client to your Icemail account — manage mailboxes, domains, and DNS in natural language."
+icon: "plug"
+---
+
+Icemail runs a hosted [Model Context Protocol](https://modelcontextprotocol.io) server at **`https://mcp.icemail.ai`**. Connect any MCP-compatible AI assistant and it can inspect and manage your Icemail infrastructure directly — list mailboxes, check domain DNS, find new sending domains, provision mailboxes, and export to your sending platform.
+
+There's nothing to install or host. Point your client at the URL below and authenticate with your Icemail API key.
+
+<CardGroup cols={2}>
+  <Card title="Endpoint" icon="link">
+    `https://mcp.icemail.ai/mcp`
+  </Card>
+  <Card title="Auth" icon="key">
+    `Authorization: Bearer YOUR_ICEMAIL_API_KEY`
+  </Card>
+</CardGroup>
+
+## Get your API key
+
+1. Go to [app.icemail.ai](https://app.icemail.ai) → **Settings → API**.
+2. Create a key and copy it. Treat it like a password — anyone with it can manage your infrastructure and provision paid mailboxes.
+
+<Note>
+Every user connects to the **same** URL. Your API key is what scopes the connection to your account and workspaces.
+</Note>
+
+## Connect your client
+
+<Tabs>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add --transport http icemail https://mcp.icemail.ai/mcp \
+      --header "Authorization: Bearer YOUR_ICEMAIL_API_KEY"
+    ```
+    Then run `claude` and ask: *"List my Icemail domains and their DNS status."*
+  </Tab>
+
+  <Tab title="Claude Desktop">
+    Open **Settings → Connectors → Add custom connector**, then enter:
+
+    - **Name:** `Icemail`
+    - **URL:** `https://mcp.icemail.ai/mcp`
+
+    When prompted for a header, add `Authorization` with value `Bearer YOUR_ICEMAIL_API_KEY`.
+
+    If your version of Claude Desktop doesn't support remote connectors, use the `mcp-remote` config under the **Other clients** tab.
+  </Tab>
+
+  <Tab title="Cursor">
+    Add to `~/.cursor/mcp.json` (or **Settings → MCP → Add server**):
+
+    ```json
+    {
+      "mcpServers": {
+        "icemail": {
+          "url": "https://mcp.icemail.ai/mcp",
+          "headers": { "Authorization": "Bearer YOUR_ICEMAIL_API_KEY" }
+        }
+      }
+    }
+    ```
+  </Tab>
+
+  <Tab title="ChatGPT">
+    In **Settings → Connectors → Create**, add a custom connector with:
+
+    - **MCP Server URL:** `https://mcp.icemail.ai/mcp`
+    - **Authentication:** Bearer token → `YOUR_ICEMAIL_API_KEY`
+  </Tab>
+
+  <Tab title="Other clients">
+    Any client that speaks Streamable HTTP MCP works with the URL and header above. For clients that only support **local (stdio)** servers, bridge with [`mcp-remote`](https://www.npmjs.com/package/mcp-remote):
+
+    ```json
+    {
+      "mcpServers": {
+        "icemail": {
+          "command": "npx",
+          "args": [
+            "-y", "mcp-remote", "https://mcp.icemail.ai/mcp",
+            "--header", "Authorization: Bearer YOUR_ICEMAIL_API_KEY"
+          ]
+        }
+      }
+    }
+    ```
+
+    Older clients that require SSE can use `https://mcp.icemail.ai/sse` instead.
+  </Tab>
+</Tabs>
+
+## What it can do
+
+Once connected, your assistant has these tools:
+
+| Tool | Description |
+|------|-------------|
+| `get_account` | Account, workspace, plan, balance, and usage |
+| `list_workspaces` | Workspaces you can access |
+| `get_usage` | Live pay-as-you-go spend for the current period |
+| `list_domains` | Connected domains with DNS/deliverability status |
+| `get_domain` | One domain's full record (SPF, DKIM, DMARC, MX) |
+| `check_domain_dns` | Re-verify live DNS propagation for a domain |
+| `find_domains` | AI domain finder — available sending domains for a brand |
+| `list_mailboxes` | Your mailboxes with provider, warmup, and health |
+| `get_mailbox` | One mailbox's details and reputation signals |
+| `provision_mailboxes` | Order new mailboxes on a domain (**paid action**) |
+| `export_mailboxes` | Export credentials for Instantly, Smartlead, Lemlist, CSV, or JSON |
+
+<Warning>
+`provision_mailboxes` charges your pay-as-you-go balance. Your assistant will ask you to confirm the domain, provider, and count before ordering.
+</Warning>
+
+## Example prompts
+
+- "Which of my domains are failing DKIM right now?"
+- "Find me five available `.com` domains for the brand *northwind* and show pricing."
+- "Provision 10 Google Workspace mailboxes on `outbound-northwind.com`."
+- "Export all mailboxes on `outbound-northwind.com` in Smartlead format."
+- "How much have I spent this billing period?"
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="401 / authentication errors">
+    Your API key is missing or invalid. Confirm the header is exactly `Authorization: Bearer YOUR_ICEMAIL_API_KEY` and that the key is active in **Settings → API**.
+  </Accordion>
+  <Accordion title="Client won't connect to a remote URL">
+    Some MCP clients only support local servers. Use the `mcp-remote` bridge shown under **Other clients** above.
+  </Accordion>
+  <Accordion title="Test the connection">
+    Run the [MCP Inspector](https://github.com/modelcontextprotocol/inspector) with `npx @modelcontextprotocol/inspector`, choose **Streamable HTTP**, enter `https://mcp.icemail.ai/mcp`, and add the `Authorization` header.
+  </Accordion>
+</AccordionGroup>

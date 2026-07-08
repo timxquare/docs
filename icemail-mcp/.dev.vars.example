@@ -1,0 +1,8 @@
+# Local-only overrides for `wrangler dev`. Copy to `.dev.vars` (gitignored).
+#
+# The per-user Icemail API key is NOT stored here — each user passes their own
+# key on every request via the `Authorization: Bearer <key>` header. This file
+# only overrides non-secret config for local development.
+
+# Point the tools at a local/staging Icemail API while developing.
+# ICEMAIL_API_BASE="http://localhost:8080"
