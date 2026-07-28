@@ -71,7 +71,8 @@
     {
       "group": "Integrations",
       "pages": [
-        "essentials/stripe-nitrosend"
+        "essentials/stripe-nitrosend",
+        "essentials/stripe-customerio"
       ]
     },
     {
