@@ -1,0 +1,464 @@
+---
+title: "Stripe + Customer.io"
+description: "Automated onboarding and payment emails for Icemail's pay-as-you-go customers using Customer.io campaigns."
+---
+
+## Overview
+
+This integration connects Stripe events to Customer.io campaigns. Icemail is pay-as-you-go — no subscriptions, no seat minimums — so the email flow reflects that: a founder intro on signup, a creative nudge if no payment lands within 24 hours, a longer educational marketing sequence, and receipt / recovery emails around payments.
+
+Stripe stays the source of truth for billing. The webhook handler below does two things and nothing else: it **identifies** the customer in Customer.io (creating or updating their profile) and **tracks events**. Every decision about what to send, and when, lives in Customer.io campaigns — so you can edit copy, timing, and branching without touching code or redeploying.
+
+**Campaigns in Customer.io:**
+
+| Campaign | Trigger | Steps |
+|----------|---------|-------|
+| New Customer Onboarding | `customer_signup` event | Founder intro → wait 24h → branch on `first_payment_made` → nudge → wait, then Day 5 check-in |
+| Marketing Education | Segment: signed up ≥ 12 days ago | 9 emails, ~one per week: pre-warmed (×3) → whitelabel (×3) → best practices (×3) |
+| Payment Succeeded | `stripe_payment_succeeded` event | Receipt email; sets `first_payment_made` attribute |
+| Payment Failed | `stripe_payment_failed` event | Alert email → wait 24h → reminder |
+
+<Note>
+  This mirrors the existing [Stripe + Nitrosend](/essentials/stripe-nitrosend) flow one-to-one, so you can run both side by side during cutover and compare deliverability before you switch traffic over.
+</Note>
+
+---
+
+## How it works
+
+1. New customer registers in your app → Stripe fires `customer.created` → the handler **identifies** them in Customer.io and **tracks** `customer_signup`, which starts the onboarding campaign immediately.
+2. Customer makes their first payment → Stripe fires `payment_intent.succeeded` → the handler sets the `first_payment_made` attribute and tracks `stripe_payment_succeeded` (receipt).
+3. The onboarding campaign's 24h branch checks `first_payment_made` — if it's already `true`, the nudge is skipped.
+4. The Marketing Education campaign is driven by a **segment** (signed up ≥ 12 days ago), not by the webhook, so it keeps sending on its weekly cadence without any per-email scheduling in code.
+
+---
+
+## Get your Customer.io credentials
+
+The webhook uses the **Track API**, which authenticates with your **Site ID** and **Track API Key** (Basic auth). Find both under **Settings → Account Settings → API Credentials → Tracking API Keys** in Customer.io.
+
+<Warning>
+  Pick the right regional endpoint. US accounts use `https://track.customer.io`; EU accounts use `https://track-eu.customer.io`. Sending to the wrong region returns `401 Unauthorized` even with correct keys.
+</Warning>
+
+Set environment variables:
+
+```bash
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+CUSTOMERIO_SITE_ID=...
+CUSTOMERIO_TRACK_API_KEY=...
+CUSTOMERIO_TRACK_URL=https://track.customer.io   # or https://track-eu.customer.io for EU
+```
+
+---
+
+## Webhook handler
+
+Install dependencies:
+
+```bash
+npm install stripe
+```
+
+<CodeGroup>
+
+```typescript TypeScript (Express)
+import express from "express";
+import Stripe from "stripe";
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+
+const CIO_BASE = `${process.env.CUSTOMERIO_TRACK_URL}/api/v1`;
+const cioAuth =
+  "Basic " +
+  Buffer.from(
+    `${process.env.CUSTOMERIO_SITE_ID}:${process.env.CUSTOMERIO_TRACK_API_KEY}`
+  ).toString("base64");
+const cioHeaders = () => ({
+  Authorization: cioAuth,
+  "Content-Type": "application/json",
+});
+
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"] as string;
+    let event: Stripe.Event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET!
+      );
+    } catch {
+      return res.status(400).send("Webhook signature verification failed");
+    }
+
+    try {
+      await handleStripeEvent(event);
+      res.json({ received: true });
+    } catch (err) {
+      console.error("Customer.io event failed:", err);
+      res.status(500).json({ error: "Failed to forward event" });
+    }
+  }
+);
+
+async function handleStripeEvent(event: Stripe.Event) {
+  switch (event.type) {
+    case "customer.created": {
+      // Identify the profile, then track the signup event — starts onboarding.
+      const customer = event.data.object as Stripe.Customer;
+      await identify(customer.email!, {
+        email: customer.email!,
+        ...splitName(customer.name),
+        stripe_customer_id: customer.id,
+        created_at: customer.created, // Customer.io expects Unix seconds
+      });
+      await track(customer.email!, "customer_signup", {});
+      break;
+    }
+    case "payment_intent.succeeded": {
+      const pi = event.data.object as Stripe.PaymentIntent;
+      const customer = await resolveCustomer(pi.customer as string);
+      // Set the attribute so the 24h branch skips the nudge sequence.
+      await identify(customer.email, { first_payment_made: true });
+      await track(customer.email, "stripe_payment_succeeded", {
+        amount: formatAmount(pi.amount, pi.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: pi.metadata?.invoice_id ?? "",
+      });
+      break;
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const customer = await resolveCustomer(invoice.customer as string);
+      await track(customer.email, "stripe_payment_failed", {
+        amount: formatAmount(invoice.amount_due, invoice.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: invoice.id,
+        failure_reason:
+          invoice.last_finalization_error?.message ?? "Card declined",
+        card_last4: await getCardLast4(invoice.customer as string),
+      });
+      break;
+    }
+  }
+}
+
+// PUT /customers/:id — creates or updates the profile. We use email as the
+// identifier so campaigns and segments key off a stable value.
+async function identify(email: string, attributes: Record<string, unknown>) {
+  const res = await fetch(`${CIO_BASE}/customers/${encodeURIComponent(email)}`, {
+    method: "PUT",
+    headers: cioHeaders(),
+    body: JSON.stringify(attributes),
+  });
+  if (!res.ok) {
+    throw new Error(`Customer.io identify failed: ${res.status} ${await res.text()}`);
+  }
+}
+
+// POST /customers/:id/events — tracks an event that can trigger a campaign.
+async function track(
+  email: string,
+  name: string,
+  data: Record<string, string>
+) {
+  const res = await fetch(
+    `${CIO_BASE}/customers/${encodeURIComponent(email)}/events`,
+    {
+      method: "POST",
+      headers: cioHeaders(),
+      body: JSON.stringify({ name, data }),
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Customer.io track failed: ${res.status} ${await res.text()}`);
+  }
+}
+
+function splitName(name: string | null) {
+  const [first, ...rest] = (name ?? "").split(" ");
+  return {
+    first_name: first || undefined,
+    last_name: rest.join(" ") || undefined,
+  };
+}
+
+async function resolveCustomer(customerId: string) {
+  const customer = await stripe.customers.retrieve(customerId);
+  if (customer.deleted) throw new Error("Customer deleted");
+  return { email: customer.email! };
+}
+
+async function getCardLast4(customerId: string): Promise<string> {
+  const methods = await stripe.paymentMethods.list({
+    customer: customerId,
+    type: "card",
+    limit: 1,
+  });
+  return methods.data[0]?.card?.last4 ?? "••••";
+}
+
+function formatAmount(amount: number, currency: string): string {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(amount / 100);
+}
+
+app.listen(3000);
+```
+
+```javascript JavaScript (Express)
+const express = require("express");
+const Stripe = require("stripe");
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+const CIO_BASE = `${process.env.CUSTOMERIO_TRACK_URL}/api/v1`;
+const cioAuth =
+  "Basic " +
+  Buffer.from(
+    `${process.env.CUSTOMERIO_SITE_ID}:${process.env.CUSTOMERIO_TRACK_API_KEY}`
+  ).toString("base64");
+const cioHeaders = () => ({
+  Authorization: cioAuth,
+  "Content-Type": "application/json",
+});
+
+app.post(
+  "/webhooks/stripe",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const sig = req.headers["stripe-signature"];
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch {
+      return res.status(400).send("Webhook signature verification failed");
+    }
+
+    try {
+      await handleStripeEvent(event);
+      res.json({ received: true });
+    } catch (err) {
+      console.error("Customer.io event failed:", err);
+      res.status(500).json({ error: "Failed to forward event" });
+    }
+  }
+);
+
+async function handleStripeEvent(event) {
+  switch (event.type) {
+    case "customer.created": {
+      const customer = event.data.object;
+      await identify(customer.email, {
+        email: customer.email,
+        ...splitName(customer.name),
+        stripe_customer_id: customer.id,
+        created_at: customer.created, // Customer.io expects Unix seconds
+      });
+      await track(customer.email, "customer_signup", {});
+      break;
+    }
+    case "payment_intent.succeeded": {
+      const pi = event.data.object;
+      const customer = await resolveCustomer(pi.customer);
+      await identify(customer.email, { first_payment_made: true });
+      await track(customer.email, "stripe_payment_succeeded", {
+        amount: formatAmount(pi.amount, pi.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: pi.metadata?.invoice_id ?? "",
+      });
+      break;
+    }
+    case "invoice.payment_failed": {
+      const invoice = event.data.object;
+      const customer = await resolveCustomer(invoice.customer);
+      await track(customer.email, "stripe_payment_failed", {
+        amount: formatAmount(invoice.amount_due, invoice.currency),
+        date: new Date().toLocaleDateString(),
+        invoice_id: invoice.id,
+        failure_reason:
+          invoice.last_finalization_error?.message ?? "Card declined",
+        card_last4: await getCardLast4(invoice.customer),
+      });
+      break;
+    }
+  }
+}
+
+async function identify(email, attributes) {
+  const res = await fetch(`${CIO_BASE}/customers/${encodeURIComponent(email)}`, {
+    method: "PUT",
+    headers: cioHeaders(),
+    body: JSON.stringify(attributes),
+  });
+  if (!res.ok) {
+    throw new Error(`Customer.io identify failed: ${res.status} ${await res.text()}`);
+  }
+}
+
+async function track(email, name, data) {
+  const res = await fetch(
+    `${CIO_BASE}/customers/${encodeURIComponent(email)}/events`,
+    {
+      method: "POST",
+      headers: cioHeaders(),
+      body: JSON.stringify({ name, data }),
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Customer.io track failed: ${res.status} ${await res.text()}`);
+  }
+}
+
+function splitName(name) {
+  const [first, ...rest] = (name ?? "").split(" ");
+  return {
+    first_name: first || undefined,
+    last_name: rest.join(" ") || undefined,
+  };
+}
+
+async function resolveCustomer(customerId) {
+  const customer = await stripe.customers.retrieve(customerId);
+  return { email: customer.email };
+}
+
+async function getCardLast4(customerId) {
+  const methods = await stripe.paymentMethods.list({
+    customer: customerId,
+    type: "card",
+    limit: 1,
+  });
+  return methods.data[0]?.card?.last4 ?? "••••";
+}
+
+function formatAmount(amount, currency) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(amount / 100);
+}
+
+app.listen(3000);
+```
+
+</CodeGroup>
+
+<Tip>
+  Icemail's production handler runs on Cloudflare Workers, not Express. The only changes needed there: read credentials from `env` instead of `process.env`, use `Stripe.createSubtleCryptoProvider()` with `constructEventAsync`, and swap `Buffer.from(...).toString("base64")` for `btoa(...)`. The Customer.io `identify` / `track` calls are identical.
+</Tip>
+
+---
+
+## Register the webhook in Stripe
+
+Subscribe to these events:
+
+- `customer.created` — identifies the profile + starts the onboarding campaign
+- `payment_intent.succeeded` — sets `first_payment_made` + sends receipt
+- `invoice.payment_failed` — sends payment-failed alert
+
+Stripe CLI for local testing:
+
+```bash
+stripe listen \
+  --events customer.created,payment_intent.succeeded,invoice.payment_failed \
+  --forward-to localhost:3000/webhooks/stripe
+```
+
+---
+
+## Onboarding campaign logic
+
+Build this as an **event-triggered campaign** in Customer.io, triggered by the `customer_signup` event:
+
+```
+customer_signup  (event trigger)
+  └── Email 1: "you're in" — founder note from Tim (immediate)
+  └── Wait 24 hours
+  └── Branch: attribute first_payment_made == true?
+        ├── TRUE → exit (they already paid, no nudge needed)
+        └── FALSE → Email 2: "a note before you start sending"
+                    └── Wait until ~Day 5 from signup
+                    └── Email 3: "what are you trying to do with icemail?"
+```
+
+The `first_payment_made` attribute is set by the webhook when `payment_intent.succeeded` fires. If it arrives before the 24h branch evaluates, the nudge is skipped. Set the branch as a **campaign exit condition** too, so anyone who pays mid-sequence stops receiving nudges.
+
+<Note>
+  In the current SendGrid/Trigger.dev stack, Day 1 sends immediately and Days 2 & 5 land on the next weekday between 7am–9pm ET. Reproduce the weekday-only timing with a **quiet hours / sending window** on the campaign (Mon–Fri, 7am–9pm, recipient or account timezone) rather than in code.
+</Note>
+
+---
+
+## Marketing Education campaign
+
+The 9-email educational sequence (pre-warmed → whitelabel → best practices) is best modeled as a **segment-triggered campaign**, not driven by the webhook:
+
+- **Segment:** `created_at` is more than 12 days ago (matches the current Day 12 start, one week after the onboarding flow ends).
+- **Cadence:** one email per week, sent inside the same Mon–Fri sending window.
+- **Order:** `prewarmed-01/02/03` → `whitelabel-01/02/03` → `bestpractices-01/02/03`.
+
+Because it's segment-driven, existing customers flow in automatically once they cross the 12-day mark — no backfill endpoint required, unlike the current Worker.
+
+---
+
+## Merge tags
+
+Customer.io uses Liquid for personalization:
+
+| Tag | Source |
+|-----|--------|
+| `{{ customer.first_name }}` | Contact first name (falls back with <code>{{ customer.first_name &#124; default: "there" }}</code>) |
+| `{{ event.amount }}` | Formatted payment amount |
+| `{{ event.date }}` | Event date |
+| `{{ event.invoice_id }}` | Stripe invoice ID |
+| `{{ event.failure_reason }}` | Decline reason (payment failed campaign) |
+| `{{ event.card_last4 }}` | Card last 4 digits (payment failed campaign) |
+
+<Warning>
+  Match the fallback the code relies on. The current signup emails use `there` when no name is present, so use <code>{{ customer.first_name &#124; default: "there" }}</code> in Customer.io to keep the same behaviour.
+</Warning>
+
+---
+
+## Go-live checklist
+
+Work top to bottom. Nothing here sends to a real customer until the final step.
+
+<Steps>
+  <Step title="Load credentials & confirm region">
+    Set `CUSTOMERIO_SITE_ID`, `CUSTOMERIO_TRACK_API_KEY`, and the region-correct `CUSTOMERIO_TRACK_URL`. A quick `identify` call on a test address should return `200`.
+  </Step>
+  <Step title="Build the campaigns & segment">
+    Recreate the onboarding campaign, the 12-day segment for Marketing Education, and the payment success/failed campaigns. Rebuild each email's copy and subject from the existing sequences, using the Liquid merge tags above.
+  </Step>
+  <Step title="Send test profiles through">
+    Use Stripe CLI (`stripe trigger customer.created`, `payment_intent.succeeded`, `invoice.payment_failed`) against a test profile and confirm each campaign fires and renders correctly. Verify the 24h branch skips the nudge once `first_payment_made` is set.
+  </Step>
+  <Step title="Point the live Stripe webhook at the handler">
+    Add your production endpoint URL in the Stripe Dashboard with the three events above, and set `STRIPE_WEBHOOK_SECRET` from the signing secret Stripe shows.
+  </Step>
+  <Step title="Set campaigns live">
+    Flip each Customer.io campaign from Draft to Live. New signups now flow through Customer.io. Watch the first real sends before decommissioning the old path.
+  </Step>
+</Steps>
+
+<Warning>
+  **Avoid double-sending during cutover.** While both this integration and the existing SendGrid/Nitrosend path are active, a new signup can be emailed by both. Before setting Customer.io campaigns live, either pause the old sender or gate it, so customers don't receive two founder intros.
+</Warning>
