@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "trigger:deploy": "trigger.dev deploy"
+    "trigger:deploy": "trigger.dev deploy",
+    "backfill:cio": "node backfill-customerio.mjs"
   },
   "dependencies": {
     "@trigger.dev/sdk": "^4.0.0",
