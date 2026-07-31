@@ -96,11 +96,19 @@ async function stripeList(path, extra = {}) {
   return out;
 }
 
+function toISODate(unixSeconds) {
+  if (!unixSeconds) return undefined;
+  return new Date(Math.floor(unixSeconds) * 1000).toISOString().slice(0, 10);
+}
+
 async function cioIdentify({ email, name, createdAt }) {
   const id = email.trim().toLowerCase();
   const { first_name, last_name } = splitName(name);
   const attributes = { email: id, first_name, last_name };
-  if (createdAt) attributes.created_at = Math.floor(createdAt);
+  if (createdAt) {
+    attributes.created_at = Math.floor(createdAt);
+    attributes.signup_date = toISODate(createdAt);
+  }
   if (DRY_RUN) return;
   await req(
     `${CIO_BASE}/api/v1/customers/${encodeURIComponent(id)}`,

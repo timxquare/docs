@@ -36,14 +36,24 @@ export function splitName(name) {
   return { first_name: parts[0], last_name: parts.slice(1).join(" ") };
 }
 
-// Create or update a person. Writes ONLY the four approved fields.
-// `createdAt` is the Stripe customer `created` unix timestamp = signup date.
+// Format a unix timestamp (seconds) as a human-readable YYYY-MM-DD (UTC).
+function toISODate(unixSeconds) {
+  if (!unixSeconds) return undefined;
+  return new Date(Math.floor(unixSeconds) * 1000).toISOString().slice(0, 10);
+}
+
+// Create or update a person. `createdAt` is the Stripe customer `created`
+// unix timestamp = signup date, written both as the reserved `created_at`
+// and as a human-readable `signup_date` (YYYY-MM-DD) for easy viewing.
 export async function cioIdentify(env, { email, name, createdAt }) {
   if (!email) return;
   const id = email.trim().toLowerCase();
   const { first_name, last_name } = splitName(name);
   const attributes = { email: id, first_name, last_name };
-  if (createdAt) attributes.created_at = Math.floor(createdAt);
+  if (createdAt) {
+    attributes.created_at = Math.floor(createdAt);
+    attributes.signup_date = toISODate(createdAt);
+  }
 
   const res = await fetch(
     `${trackBase(env)}/api/v1/customers/${encodeURIComponent(id)}`,
